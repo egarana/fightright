@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useTwoFactorAuth } from '@/composables/useTwoFactorAuth';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
+import { createFormAction } from '@/lib/wayfinder-helpers';
 import { disable, enable, show } from '@/routes/two-factor';
 import { BreadcrumbItem } from '@/types';
 import { Form, Head } from '@inertiajs/vue3';
@@ -32,6 +33,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const { hasSetupData, clearTwoFactorAuthData } = useTwoFactorAuth();
 const showSetupModal = ref<boolean>(false);
+
+const enableForm = createFormAction(enable.url(), 'post');
+const disableForm = createFormAction(disable.url(), 'delete');
 
 onUnmounted(() => {
     clearTwoFactorAuthData();
@@ -70,7 +74,7 @@ onUnmounted(() => {
                         </Button>
                         <Form
                             v-else
-                            v-bind="enable.form()"
+                            v-bind="enableForm"
                             @success="showSetupModal = true"
                             #default="{ processing }"
                         >
@@ -97,7 +101,7 @@ onUnmounted(() => {
                     <TwoFactorRecoveryCodes />
 
                     <div class="relative inline">
-                        <Form v-bind="disable.form()" #default="{ processing }">
+                        <Form v-bind="disableForm" #default="{ processing }">
                             <Button
                                 variant="destructive"
                                 type="submit"

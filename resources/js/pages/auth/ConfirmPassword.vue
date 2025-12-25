@@ -5,8 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
+import { createFormAction } from '@/lib/wayfinder-helpers';
 import { store } from '@/routes/password/confirm';
 import { Form, Head } from '@inertiajs/vue3';
+
+const confirmPasswordForm = createFormAction(store.url(), 'post');
 </script>
 
 <template>
@@ -17,7 +20,7 @@ import { Form, Head } from '@inertiajs/vue3';
         <Head title="Confirm password" />
 
         <Form
-            v-bind="store.form()"
+            v-bind="confirmPasswordForm"
             reset-on-success
             v-slot="{ errors, processing }"
         >

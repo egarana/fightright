@@ -3,6 +3,7 @@ import PasswordController from '@/actions/App/Http/Controllers/Settings/Password
 import InputError from '@/components/InputError.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
+import { createFormAction } from '@/lib/wayfinder-helpers';
 import { edit } from '@/routes/user-password';
 import { Form, Head } from '@inertiajs/vue3';
 
@@ -18,6 +19,8 @@ const breadcrumbItems: BreadcrumbItem[] = [
         href: edit().url,
     },
 ];
+
+const passwordUpdateForm = createFormAction(PasswordController.update.url(), 'put');
 </script>
 
 <template>
@@ -32,7 +35,7 @@ const breadcrumbItems: BreadcrumbItem[] = [
                 />
 
                 <Form
-                    v-bind="PasswordController.update.form()"
+                    v-bind="passwordUpdateForm"
                     :options="{
                         preserveScroll: true,
                     }"

@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
+import { createFormAction } from '@/lib/wayfinder-helpers';
 import { type BreadcrumbItem } from '@/types';
 
 interface Props {
@@ -30,6 +31,8 @@ const breadcrumbItems: BreadcrumbItem[] = [
 
 const page = usePage();
 const user = page.props.auth.user;
+
+const profileUpdateForm = createFormAction(ProfileController.update.url(), 'patch');
 </script>
 
 <template>
@@ -44,7 +47,7 @@ const user = page.props.auth.user;
                 />
 
                 <Form
-                    v-bind="ProfileController.update.form()"
+                    v-bind="profileUpdateForm"
                     class="space-y-6"
                     v-slot="{ errors, processing, recentlySuccessful }"
                 >

@@ -14,14 +14,38 @@ import {
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
+import { BookOpen, CalendarCheck, ContactRound, Folder, IdCard, LayoutGrid, Users } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
+import users from '@/routes/users';
+import members from '@/routes/members';
+import memberships from '@/routes/memberships';
+import attendances from '@/routes/attendances';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Users',
+        href: users.index(),
+        icon: Users,
+    },
+    {
+        title: 'Members',
+        href: members.index(),
+        icon: ContactRound,
+    },
+    {
+        title: 'Memberships',
+        href: memberships.index(),
+        icon: IdCard,
+    },
+    {
+        title: 'Attendances',
+        href: attendances.index(),
+        icon: CalendarCheck,
     },
 ];
 
@@ -58,7 +82,7 @@ const footerNavItems: NavItem[] = [
         </SidebarContent>
 
         <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
+            <!-- <NavFooter :items="footerNavItems" /> -->
             <NavUser />
         </SidebarFooter>
     </Sidebar>

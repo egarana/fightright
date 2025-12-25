@@ -19,8 +19,10 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { createFormAction } from '@/lib/wayfinder-helpers';
 
 const passwordInput = useTemplateRef('passwordInput');
+const deleteAccountForm = createFormAction(ProfileController.destroy.url(), 'delete');
 </script>
 
 <template>
@@ -46,7 +48,7 @@ const passwordInput = useTemplateRef('passwordInput');
                 </DialogTrigger>
                 <DialogContent>
                     <Form
-                        v-bind="ProfileController.destroy.form()"
+                        v-bind="deleteAccountForm"
                         reset-on-success
                         @error="() => passwordInput?.$el?.focus()"
                         :options="{

@@ -16,11 +16,14 @@ import {
 } from '@/components/ui/input-otp';
 import { Spinner } from '@/components/ui/spinner';
 import { useTwoFactorAuth } from '@/composables/useTwoFactorAuth';
+import { createFormAction } from '@/lib/wayfinder-helpers';
 import { confirm } from '@/routes/two-factor';
 import { Form } from '@inertiajs/vue3';
 import { useClipboard } from '@vueuse/core';
 import { Check, Copy, ScanLine } from 'lucide-vue-next';
 import { computed, nextTick, ref, useTemplateRef, watch } from 'vue';
+
+const confirmForm = createFormAction(confirm.url(), 'post');
 
 interface Props {
     requiresConfirmation: boolean;
@@ -231,7 +234,7 @@ watch(
 
                 <template v-else>
                     <Form
-                        v-bind="confirm.form()"
+                        v-bind="confirmForm"
                         reset-on-error
                         @finish="code = ''"
                         @success="isOpen = false"
