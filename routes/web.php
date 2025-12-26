@@ -183,9 +183,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('today', 'today')->name('today');
-            Route::get('create', 'showCheckIn')->name('create');
-            Route::post('/', 'checkIn')->name('store');
-            Route::post('check-in', 'checkIn')->name('check-in');
         });
 });
 

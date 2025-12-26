@@ -61,8 +61,8 @@ class PublicMemberController extends Controller
             return back()->with('error', 'Cannot check-in. Membership expired or quota exhausted.');
         }
 
-        // Log the attendance
-        $this->attendanceService->checkIn($membership);
+        // Log the attendance with the authenticated user as recorder
+        $this->attendanceService->checkIn($membership, auth()->user());
 
         return back()->with('success', 'Visit logged successfully.');
     }

@@ -18,6 +18,8 @@ class Attendance extends Model
         'check_in_at',
         'check_out_at',
         'notes',
+        'recorded_by_user_id',
+        'snapshot_recorded_by_name',
     ];
 
     protected function casts(): array
@@ -35,6 +37,14 @@ class Attendance extends Model
     public function memberMembership(): BelongsTo
     {
         return $this->belongsTo(MemberMembership::class);
+    }
+
+    /**
+     * Get the user who recorded this attendance.
+     */
+    public function recordedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'recorded_by_user_id');
     }
 
     /**

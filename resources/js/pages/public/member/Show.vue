@@ -2,9 +2,11 @@
 import Badge from '@/components/ui/badge/Badge.vue';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Switch } from '@/components/ui/switch';
+import Spinner from '@/components/ui/spinner/Spinner.vue';
 import { Head, router } from '@inertiajs/vue3';
 import dayjs from 'dayjs';
 import { ref, computed } from 'vue';
+import publicRoutes from '@/routes/public';
 
 const props = defineProps<{
     member: any;
@@ -41,9 +43,12 @@ const handleCheckIn = (membership: any) => {
     if (loadingStates.value[membership.id]) return;
 
     loadingStates.value[membership.id] = true;
+    
+    // Use wayfinder route helper to get correct URL with proper domain
+    const checkInUrl = publicRoutes.member.show.url(props.member.member_code) + '/check-in';
 
     router.post(
-        `/m/${props.member.member_code}/check-in`,
+        checkInUrl,
         { member_membership_id: membership.id },
         {
             preserveScroll: true,
@@ -119,7 +124,7 @@ const getStatusLabel = (membership: any) => {
                                     <div class="flex flex-col gap-0.5">
                                         <div class="flex items-center gap-2">
                                             <span class="text-sm font-medium">Session #{{ slot }}</span>
-                                            <span class="text-xs text-muted-foreground">•</span>
+                                            <span class="text-xs text-muted-foreground">-</span>
                                             <span 
                                                 class="text-xs"
                                                 :class="isSlotUsed(membership, slot) ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'"
@@ -127,19 +132,22 @@ const getStatusLabel = (membership: any) => {
                                                 {{ isSlotUsed(membership, slot) ? 'Used' : 'Available' }}
                                             </span>
                                         </div>
-                                        <span class="text-xs text-muted-foreground">
-                                            {{ 
-                                                isSlotUsed(membership, slot) && getAttendanceForSlot(membership, slot)
-                                                    ? formatDateTime(getAttendanceForSlot(membership, slot).check_in_at)
-                                                    : '—' 
-                                            }}
+                                        <span v-if="isSlotUsed(membership, slot) && getAttendanceForSlot(membership, slot)" class="text-xs text-muted-foreground">
+                                            {{ formatDateTime(getAttendanceForSlot(membership, slot).check_in_at) }}
+                                            <template v-if="getAttendanceForSlot(membership, slot).snapshot_recorded_by_name">
+                                                · by {{ getAttendanceForSlot(membership, slot).snapshot_recorded_by_name }}
+                                            </template>
                                         </span>
                                     </div>
-                                    <Switch
-                                        :checked="isSlotUsed(membership, slot)"
-                                        :disabled="!isAdmin || slot !== membership.used_count + 1 || loadingStates[membership.id]"
-                                        @update:checked="handleCheckIn(membership)"
-                                    />
+                                    <div v-if="isAdmin" class="flex items-center gap-2">
+                                        <!-- Spinner only shows on the slot being checked in -->
+                                        <Spinner v-if="loadingStates[membership.id] && slot === membership.used_count + 1" class="text-muted-foreground" />
+                                        <Switch
+                                            :model-value="isSlotUsed(membership, slot)"
+                                            :disabled="slot !== membership.used_count + 1 || loadingStates[membership.id]"
+                                            @update:model-value="handleCheckIn(membership)"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <!-- Unlimited membership - just show summary -->

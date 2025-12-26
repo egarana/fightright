@@ -35,8 +35,16 @@ class AttendanceRepository
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
-            $query->where('snapshot_member_name', 'like', "%{$search}%")
-                ->orWhere('snapshot_membership_name', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('snapshot_member_name', 'like', "%{$search}%")
+                    ->orWhere('snapshot_membership_name', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by recorded_by admin name(s) - supports comma-separated values
+        if (!empty($filters['recorded_by'])) {
+            $recordedByNames = array_map('trim', explode(',', $filters['recorded_by']));
+            $query->whereIn('snapshot_recorded_by_name', $recordedByNames);
         }
 
         return $query->paginate($perPage);

@@ -1,20 +1,18 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import attendanceRoutes from '@/routes/attendances';
 import ResourceTable from '@/components/ResourceTable.vue';
-import ResourceTableFilter from '@/components/ResourceTableFilter.vue';
+import ResourceTableFilter, { type FilterConfig } from '@/components/ResourceTableFilter.vue';
 import { useFetcher } from '@/composables/useFetcher';
-import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-vue-next';
+import { computed } from 'vue';
 import dayjs from 'dayjs';
 
 const props = defineProps<{
     attendances: any;
+    admins: string[];
     filters?: any;
 }>();
-
-
 
 const breadcrumbs = [
     {
@@ -28,10 +26,23 @@ const { resource, refresh } = useFetcher({
     resourceKey: 'attendances',
 });
 
+// Build admin filter options from backend data
+const adminFilters = computed<FilterConfig[]>(() => {
+    if (!props.admins || props.admins.length === 0) return [];
+    
+    return [{
+        name: 'recordedBy',
+        label: 'Recorded By',
+        placeholder: 'Filter by admin',
+        options: props.admins,
+    }];
+});
+
 const columns = [
     { key: 'snapshot_member_name', label: 'Member', className: 'font-medium', headClassName: '[&>span:first-of-type]:ps-4' },
     { key: 'snapshot_membership_name', label: 'Membership', headClassName: '[&>span:first-of-type]:ps-4' },
     { key: 'check_in_at', label: 'Time', headClassName: '[&>span:first-of-type]:ps-4' },
+    { key: 'snapshot_recorded_by_name', label: 'Recorded By', headClassName: '[&>span:first-of-type]:ps-4' },
 ];
 
 const formatDateTime = (date: string) => dayjs(date).format('DD MMM YYYY, HH:mm');
@@ -48,14 +59,8 @@ const formatDateTime = (date: string) => dayjs(date).format('DD MMM YYYY, HH:mm'
                     :search-fields="['snapshot_member_name']"
                     :show-add-button="false"
                     :refresh="refresh"
+                    :filters="adminFilters"
                 />
-
-                <Link :href="attendanceRoutes.create.url()">
-                    <Button>
-                        <PlusCircle class="w-4 h-4 mr-1.5" />
-                        Log visit
-                    </Button>
-                </Link>
             </div>
 
             <ResourceTable
@@ -67,7 +72,13 @@ const formatDateTime = (date: string) => dayjs(date).format('DD MMM YYYY, HH:mm'
                 <template #cell-check_in_at="{ value }">
                     {{ formatDateTime(value) }}
                 </template>
+                <template #cell-snapshot_recorded_by_name="{ value }">
+                    <span v-if="value" class="text-muted-foreground">{{ value }}</span>
+                    <span v-else class="text-muted-foreground/50 italic">—</span>
+                </template>
             </ResourceTable>
         </div>
     </AppLayout>
 </template>
+
+

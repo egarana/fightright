@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\MembershipExpiredException;
 use App\Models\Attendance;
 use App\Models\MemberMembership;
+use App\Models\User;
 use App\Repositories\AttendanceRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -69,11 +70,14 @@ class AttendanceService
     /**
      * Check-in member with validation.
      *
+     * @param MemberMembership $memberMembership The membership to check-in
+     * @param User|null $recordedBy The admin/staff who is recording this attendance
+     * @param string|null $notes Optional notes for the attendance
      * @throws MembershipExpiredException
      * @throws QuotaExhaustedException
      * @throws AlreadyCheckedInException
      */
-    public function checkIn(MemberMembership $memberMembership, ?string $notes = null): Attendance
+    public function checkIn(MemberMembership $memberMembership, ?User $recordedBy = null, ?string $notes = null): Attendance
     {
         // Validate membership status
         if ($memberMembership->status !== 'active') {
@@ -99,7 +103,7 @@ class AttendanceService
         //     throw new AlreadyCheckedInException('Member is already checked-in.');
         // }
 
-        // Create attendance with snapshot
+        // Create attendance with snapshot (including who recorded it)
         return $this->repository->create([
             'member_membership_id' => $memberMembership->id,
             'snapshot_member_name' => $memberMembership->member->name,
@@ -107,6 +111,8 @@ class AttendanceService
             'snapshot_remaining_before' => $memberMembership->remaining_qty,
             'check_in_at' => now(),
             'notes' => $notes,
+            'recorded_by_user_id' => $recordedBy?->id,
+            'snapshot_recorded_by_name' => $recordedBy?->name,
         ]);
     }
 }
