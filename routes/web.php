@@ -40,11 +40,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Users
+    | Users (Super Admin Only)
     |--------------------------------------------------------------------------
     */
     Route::prefix('users')
         ->name('users.')
+        ->middleware('role_or_404:super-admin')
         ->controller(UserController::class)
         ->group(function () {
             Route::get('/', 'index')->name('index');
@@ -68,9 +69,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('create', 'create')->name('create');
             Route::post('/', 'store')->name('store');
             Route::get('{member}', 'show')->name('show');
-            Route::get('{member}/edit', 'edit')->name('edit');
-            Route::put('{member}', 'update')->name('update');
-            Route::delete('{member}', 'destroy')->name('destroy');
+
+            // Edit - super-admin, owner, manager only
+            Route::get('{member}/edit', 'edit')
+                ->middleware('can_or_404:edit_members')
+                ->name('edit');
+            Route::put('{member}', 'update')
+                ->middleware('can_or_404:edit_members')
+                ->name('update');
+
+            // Delete - super-admin, owner only
+            Route::delete('{member}', 'destroy')
+                ->middleware('can_or_404:delete_members')
+                ->name('destroy');
 
             // Member Memberships (nested resource)
             Route::prefix('{member}/memberships')
@@ -80,13 +91,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
                     Route::get('/', 'index')->name('index');
                     Route::get('create', 'create')->name('create');
                     Route::post('/', 'store')->name('store');
-                    Route::delete('{memberMembership}', 'destroy')->name('destroy');
+                    // Delete - super-admin, owner, manager only
+                    Route::delete('{memberMembership}', 'destroy')
+                        ->middleware('can_or_404:manage_member_memberships')
+                        ->name('destroy');
                 });
         });
 
     /*
     |--------------------------------------------------------------------------
-    | Memberships
+    | Memberships (View: all, CUD: super-admin & owner only)
     |--------------------------------------------------------------------------
     */
     Route::prefix('memberships')
@@ -94,11 +108,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->controller(MembershipController::class)
         ->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('{membership}/edit', 'edit')->name('edit');
-            Route::put('{membership}', 'update')->name('update');
-            Route::delete('{membership}', 'destroy')->name('destroy');
+
+            // Create/Edit/Delete - super-admin & owner only
+            Route::get('create', 'create')
+                ->middleware('can_or_404:manage_memberships')
+                ->name('create');
+            Route::post('/', 'store')
+                ->middleware('can_or_404:manage_memberships')
+                ->name('store');
+            Route::get('{membership}/edit', 'edit')
+                ->middleware('can_or_404:manage_memberships')
+                ->name('edit');
+            Route::put('{membership}', 'update')
+                ->middleware('can_or_404:manage_memberships')
+                ->name('update');
+            Route::delete('{membership}', 'destroy')
+                ->middleware('can_or_404:manage_memberships')
+                ->name('destroy');
         });
 
     /*
@@ -114,8 +140,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('create', 'create')->name('create');
             Route::post('/', 'store')->name('store');
             Route::get('{member_membership}', 'show')->name('show');
-            Route::post('{member_membership}/cancel', 'cancel')->name('cancel');
-            Route::delete('{member_membership}', 'destroy')->name('destroy');
+
+            // Cancel/Delete - super-admin, owner, manager only
+            Route::post('{member_membership}/cancel', 'cancel')
+                ->middleware('can_or_404:manage_member_memberships')
+                ->name('cancel');
+            Route::delete('{member_membership}', 'destroy')
+                ->middleware('can_or_404:manage_member_memberships')
+                ->name('destroy');
         });
 
     /*
@@ -132,7 +164,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('check-in', 'showCheckIn')->name('check-in.show');
             Route::post('check-in', 'checkIn')->name('check-in');
             Route::post('{attendance}/check-out', 'checkOut')->name('check-out');
-            Route::delete('{attendance}', 'destroy')->name('destroy');
+
+            // Delete - super-admin, owner, manager only
+            Route::delete('{attendance}', 'destroy')
+                ->middleware('can_or_404:delete_attendances')
+                ->name('destroy');
         });
 });
 

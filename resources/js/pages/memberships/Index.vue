@@ -3,8 +3,13 @@ import memberships from '@/routes/memberships';
 import BaseIndexPage from '@/components/BaseIndexPage.vue';
 import { formatCurrency } from '@/helpers/currency';
 import { Badge } from '@/components/ui/badge';
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
-const config = {
+const page = usePage();
+const can = computed(() => (page.props.auth as any)?.can ?? {});
+
+const config = computed(() => ({
     resourceName: 'Membership',
     resourceNamePlural: 'Memberships',
     endpoint: memberships.index.url(),
@@ -23,10 +28,15 @@ const config = {
     breadcrumbs: [
         { title: 'Memberships', href: memberships.index.url() },
     ],
-    addButtonRoute: memberships.create.url(),
-    editRoute: (item: any) => memberships.edit.url(item.id),
-    deleteRoute: (item: any) => ({ url: memberships.destroy.url(item.id) }),
-};
+    // Add/Edit/Delete - only if user has manage_memberships permission
+    addButtonRoute: can.value.manage_memberships ? memberships.create.url() : undefined,
+    editRoute: can.value.manage_memberships 
+        ? (item: any) => memberships.edit.url(item.id) 
+        : undefined,
+    deleteRoute: can.value.manage_memberships 
+        ? (item: any) => ({ url: memberships.destroy.url(item.id) }) 
+        : undefined,
+}));
 </script>
 
 <template>
@@ -38,4 +48,3 @@ const config = {
         </template>
     </BaseIndexPage>
 </template>
-

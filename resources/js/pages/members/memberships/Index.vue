@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import members from '@/routes/members';
-import { ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { useFetcher } from '@/composables/useFetcher';
@@ -76,6 +76,9 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const page = usePage();
+const can = computed(() => (page.props.auth as any)?.can ?? {});
 
 const breadcrumbs = [
     { title: 'Members', href: members.index.url() },
@@ -178,8 +181,8 @@ const formatDate = (date: string) => dayjs(date).format('DD MMM YYYY');
                     :refresh="refresh"
                 />
 
-                <!-- Add Membership Dialog -->
-                <Dialog v-model:open="dialogOpen">
+                <!-- Add Membership Dialog - only if user can manage -->
+                <Dialog v-if="can.manage_member_memberships" v-model:open="dialogOpen">
                     <DialogTrigger as-child>
                         <Button>
                             <PlusCircle class="w-4 h-4" />
@@ -281,7 +284,9 @@ const formatDate = (date: string) => dayjs(date).format('DD MMM YYYY');
                 :handle-sort="handleSort"
                 :refresh="refresh"
                 resource-name="membership"
-                :delete-route="(item: any) => ({ url: members.memberships.destroy.url({ member: member.id, memberMembership: item.id }) })"
+                :delete-route="can.manage_member_memberships 
+                    ? (item: any) => ({ url: members.memberships.destroy.url({ member: member.id, memberMembership: item.id }) })
+                    : undefined"
             >
                 <template #cell-started_at="{ value }">
                     {{ formatDate(value) }}

@@ -38,12 +38,36 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $user = $request->user();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
+                'roles' => $user?->getRoleNames() ?? [],
+                'can' => [
+                    // Users - super-admin only
+                    'manage_users' => $user?->hasRole('super-admin') ?? false,
+
+                    // Memberships - super-admin & owner can manage (create/edit/delete)
+                    'manage_memberships' => $user?->hasAnyRole(['super-admin', 'owner']) ?? false,
+
+                    // Members - super-admin, owner, manager can edit
+                    'edit_members' => $user?->hasAnyRole(['super-admin', 'owner', 'manager']) ?? false,
+                    // Members - super-admin & owner can delete
+                    'delete_members' => $user?->hasAnyRole(['super-admin', 'owner']) ?? false,
+
+                    // Member Memberships - super-admin, owner, manager can delete/cancel
+                    'manage_member_memberships' => $user?->hasAnyRole(['super-admin', 'owner', 'manager']) ?? false,
+
+                    // Attendances - super-admin, owner, manager can delete
+                    'delete_attendances' => $user?->hasAnyRole(['super-admin', 'owner', 'manager']) ?? false,
+
+                    // Revenue/financial data - super-admin & owner only
+                    'view_revenue' => $user?->hasAnyRole(['super-admin', 'owner']) ?? false,
+                ],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

@@ -4,7 +4,11 @@ use App\Models\Member;
 use App\Models\User;
 
 beforeEach(function () {
+    // Create owner role for testing (has edit/delete members permission)
+    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'owner', 'guard_name' => 'web']);
+
     $this->user = User::factory()->create();
+    $this->user->assignRole('owner');
     $this->actingAs($this->user);
 });
 
@@ -38,7 +42,7 @@ test('can create a member', function () {
     ];
 
     $this->post(route('members.store'), $memberData)
-        ->assertRedirect(route('members.index'));
+        ->assertRedirect(route('members.index', ['sort' => '-created_at']));
 
     $this->assertDatabaseHas('members', [
         'name' => 'Test Member',
@@ -85,7 +89,7 @@ test('can update a member', function () {
         'email' => $member->email,
         'phone' => $phoneData,
         'address' => 'Updated Address',
-    ])->assertRedirect(route('members.index'));
+    ])->assertRedirect(route('members.index', ['sort' => '-updated_at']));
 
     $this->assertDatabaseHas('members', [
         'id' => $member->id,

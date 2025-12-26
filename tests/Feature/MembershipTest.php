@@ -4,7 +4,11 @@ use App\Models\Membership;
 use App\Models\User;
 
 beforeEach(function () {
+    // Create owner role for testing (has manage_memberships permission)
+    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'owner', 'guard_name' => 'web']);
+
     $this->user = User::factory()->create();
+    $this->user->assignRole('owner');
     $this->actingAs($this->user);
 });
 
@@ -31,7 +35,7 @@ test('can create a membership', function () {
     ];
 
     $this->post(route('memberships.store'), $membershipData)
-        ->assertRedirect(route('memberships.index'));
+        ->assertRedirect(route('memberships.index', ['sort' => '-created_at']));
 
     $this->assertDatabaseHas('memberships', [
         'name' => 'Gold Membership',
@@ -48,7 +52,7 @@ test('can create unlimited membership', function () {
     ];
 
     $this->post(route('memberships.store'), $membershipData)
-        ->assertRedirect(route('memberships.index'));
+        ->assertRedirect(route('memberships.index', ['sort' => '-created_at']));
 
     $this->assertDatabaseHas('memberships', [
         'name' => 'Unlimited Membership',
@@ -63,7 +67,7 @@ test('can update a membership', function () {
         'name' => 'Updated Membership',
         'duration_days' => 60,
         'price' => 750000,
-    ])->assertRedirect(route('memberships.index'));
+    ])->assertRedirect(route('memberships.index', ['sort' => '-updated_at']));
 
     $this->assertDatabaseHas('memberships', [
         'id' => $membership->id,

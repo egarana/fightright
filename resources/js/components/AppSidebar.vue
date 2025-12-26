@@ -12,8 +12,9 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 import { BookOpen, CalendarCheck, ContactRound, Folder, IdCard, LayoutGrid, Users } from 'lucide-vue-next';
+import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 import dashboard from '@/routes/dashboard';
 import users from '@/routes/users';
@@ -21,33 +22,50 @@ import members from '@/routes/members';
 import memberships from '@/routes/memberships';
 import attendances from '@/routes/attendances';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard.index.url(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Users',
-        href: users.index.url(),
-        icon: Users,
-    },
-    {
-        title: 'Members',
-        href: members.index.url(),
-        icon: ContactRound,
-    },
-    {
-        title: 'Memberships',
-        href: memberships.index.url(),
-        icon: IdCard,
-    },
-    {
-        title: 'Attendances',
-        href: attendances.index.url(),
-        icon: CalendarCheck,
-    },
-];
+const page = usePage();
+
+// Auth permissions from backend
+const can = computed(() => (page.props.auth as any)?.can ?? {});
+
+// Build nav items based on permissions
+const mainNavItems = computed<NavItem[]>(() => {
+    const items: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard.index.url(),
+            icon: LayoutGrid,
+        },
+    ];
+
+    // Only super-admin can see Users
+    if (can.value.manage_users) {
+        items.push({
+            title: 'Users',
+            href: users.index.url(),
+            icon: Users,
+        });
+    }
+
+    items.push(
+        {
+            title: 'Members',
+            href: members.index.url(),
+            icon: ContactRound,
+        },
+        {
+            title: 'Memberships',
+            href: memberships.index.url(),
+            icon: IdCard,
+        },
+        {
+            title: 'Attendances',
+            href: attendances.index.url(),
+            icon: CalendarCheck,
+        },
+    );
+
+    return items;
+});
 
 const footerNavItems: NavItem[] = [
     {

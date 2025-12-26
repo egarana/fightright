@@ -2,8 +2,13 @@
 import members from '@/routes/members';
 import BaseIndexPage from '@/components/BaseIndexPage.vue';
 import { IdCard } from 'lucide-vue-next';
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
-const config = {
+const page = usePage();
+const can = computed(() => (page.props.auth as any)?.can ?? {});
+
+const config = computed(() => ({
     resourceName: 'Member',
     resourceNamePlural: 'Members',
     endpoint: members.index.url(),
@@ -22,8 +27,14 @@ const config = {
         { title: 'Members', href: members.index.url() },
     ],
     addButtonRoute: members.create.url(),
-    editRoute: (item: any) => members.edit.url(item.id),
-    deleteRoute: (item: any) => ({ url: members.destroy.url(item.id) }),
+    // Edit - only if user has edit_members permission
+    editRoute: can.value.edit_members 
+        ? (item: any) => members.edit.url(item.id) 
+        : undefined,
+    // Delete - only if user has delete_members permission
+    deleteRoute: can.value.delete_members 
+        ? (item: any) => ({ url: members.destroy.url(item.id) }) 
+        : undefined,
     customActions: [
         {
             icon: IdCard,
@@ -32,7 +43,7 @@ const config = {
             variant: 'outline' as const,
         },
     ],
-};
+}));
 </script>
 
 <template>
