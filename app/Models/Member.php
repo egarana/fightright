@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\MemberCodeService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -19,6 +20,11 @@ class Member extends Model
         'phone',
         'address',
     ];
+
+    /**
+     * The accessors to append to the model's array form.
+     */
+    protected $appends = ['encoded_url'];
 
     /**
      * Get the attributes that should be cast.
@@ -58,6 +64,15 @@ class Member extends Model
         } while (self::where('member_code', $code)->exists());
 
         return $code;
+    }
+
+    /**
+     * Get the encoded URL hash for this member.
+     * Used for public URLs to prevent ID enumeration.
+     */
+    public function getEncodedUrlAttribute(): string
+    {
+        return MemberCodeService::encode($this->id);
     }
 
 

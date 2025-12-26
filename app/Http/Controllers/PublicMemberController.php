@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Member;
 use App\Models\MemberMembership;
 use App\Services\AttendanceService;
+use App\Services\MemberCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,9 +19,17 @@ class PublicMemberController extends Controller
 
     /**
      * Show the public member profile.
+     * 
+     * @param string $hash The obfuscated member ID from URL
      */
-    public function show(Member $member): Response
+    public function show(string $hash): Response
     {
+        $member = MemberCodeService::findByHash($hash);
+
+        if (!$member) {
+            abort(404);
+        }
+
         // Get all memberships (including expired) with attendances for slot tracking
         $memberships = $member->memberMemberships()
             ->with(['membership', 'attendances' => fn($q) => $q->orderBy('created_at', 'asc')])
@@ -43,9 +52,17 @@ class PublicMemberController extends Controller
 
     /**
      * Log a visit for a member's membership (admin only).
+     * 
+     * @param string $hash The obfuscated member ID from URL
      */
-    public function checkIn(Request $request, Member $member): RedirectResponse
+    public function checkIn(Request $request, string $hash): RedirectResponse
     {
+        $member = MemberCodeService::findByHash($hash);
+
+        if (!$member) {
+            abort(404);
+        }
+
         $validated = $request->validate([
             'member_membership_id' => 'required|integer',
         ]);

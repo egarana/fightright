@@ -45,7 +45,8 @@ const handleCheckIn = (membership: any) => {
     loadingStates.value[membership.id] = true;
     
     // Use wayfinder route helper to get correct URL with proper domain
-    const checkInUrl = publicRoutes.member.show.url(props.member.member_code) + '/check-in';
+    // Use encoded_url for obfuscated URLs (hash-based)
+    const checkInUrl = publicRoutes.member.show.url(props.member.encoded_url) + '/check-in';
 
     router.post(
         checkInUrl,

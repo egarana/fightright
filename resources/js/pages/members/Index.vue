@@ -40,7 +40,8 @@ const config = computed(() => ({
             icon: ExternalLink,
             label: 'View',
             tooltip: 'View profile',
-            url: (item: any) => `/m/${item.member_code}`,
+            url: (item: any) => `/m/${item.encoded_url}`,
+            target: '_blank',
         },
         {
             icon: IdCard,
@@ -55,7 +56,7 @@ const config = computed(() => ({
 <template>
     <BaseIndexPage title="Members" :config="config">
         <template #cell-member_memberships_count="{ value }">
-             <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2">
                 <IdCard class="w-4 h-4 text-muted-foreground" />
                 <span>{{ value }}</span>
             </div>

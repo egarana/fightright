@@ -18,10 +18,10 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('/m/{member:member_code}', [PublicMemberController::class, 'show'])
+Route::get('/m/{hash}', [PublicMemberController::class, 'show'])
     ->name('public.member.show');
 
-Route::post('/m/{member:member_code}/check-in', [PublicMemberController::class, 'checkIn'])
+Route::post('/m/{hash}/check-in', [PublicMemberController::class, 'checkIn'])
     ->middleware(['auth'])
     ->name('public.member.check-in');
 

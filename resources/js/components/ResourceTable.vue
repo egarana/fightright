@@ -48,6 +48,7 @@ const props = defineProps<{
         variant?: 'ghost' | 'outline' | 'default' | 'secondary' | 'destructive';
         condition?: (item: any) => boolean; // Optional condition to show/hide button
         method?: 'get' | 'post'; // HTTP method, defaults to 'get'
+        target?: string; // Optional target (e.g., '_blank')
         handler?: (item: any) => void; // Optional custom handler
     }>;
     editAssignmentConfig?: {
@@ -149,6 +150,9 @@ const handleCustomAction = (action: any, item: any) => {
     if (action.handler) {
         // Use custom handler if provided
         action.handler(item);
+    } else if (action.target === '_blank') {
+        // Open in new tab if target is _blank
+        window.open(action.url(item), '_blank');
     } else if (action.method === 'post') {
         // Use router.post for POST requests
         router.post(action.url(item));
@@ -157,6 +161,7 @@ const handleCustomAction = (action: any, item: any) => {
         router.visit(action.url(item));
     }
 };
+
 </script>
 
 <template>
