@@ -27,12 +27,19 @@ class AttendanceRepository
     /**
      * Get paginated attendances.
      */
-    public function paginate(int $perPage = 15): LengthAwarePaginator
+    public function paginate(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
-        return $this->model
+        $query = $this->model
             ->with(['memberMembership.member', 'memberMembership.membership'])
-            ->orderBy('check_in_at', 'desc')
-            ->paginate($perPage);
+            ->orderBy('check_in_at', 'desc');
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where('snapshot_member_name', 'like', "%{$search}%")
+                ->orWhere('snapshot_membership_name', 'like', "%{$search}%");
+        }
+
+        return $query->paginate($perPage);
     }
 
     /**
@@ -84,13 +91,7 @@ class AttendanceRepository
         return $attendance->fresh();
     }
 
-    /**
-     * Delete attendance.
-     */
-    public function delete(Attendance $attendance): bool
-    {
-        return $attendance->delete();
-    }
+
 
     /**
      * Get today's attendances.

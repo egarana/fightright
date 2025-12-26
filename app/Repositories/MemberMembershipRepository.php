@@ -27,12 +27,28 @@ class MemberMembershipRepository
     /**
      * Get paginated member memberships.
      */
-    public function paginate(int $perPage = 15): LengthAwarePaginator
+    /**
+     * Get paginated member memberships.
+     */
+    public function paginate(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
-        return $this->model
+        $query = $this->model
             ->with(['member', 'membership'])
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+            ->orderBy('created_at', 'desc');
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->whereHas('member', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('member_code', 'like', "%{$search}%");
+            });
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->paginate($perPage);
     }
 
     /**

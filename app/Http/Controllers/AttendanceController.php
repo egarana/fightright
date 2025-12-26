@@ -27,8 +27,15 @@ class AttendanceController extends Controller
      */
     public function index(): Response
     {
+        $search = request('search');
+
         return Inertia::render('attendances/Index', [
-            'attendances' => $this->service->getPaginated(),
+            'attendances' => $this->service->getPaginated(15, [
+                'search' => $search,
+            ]),
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
@@ -45,10 +52,21 @@ class AttendanceController extends Controller
     /**
      * Show the check-in form.
      */
+    /**
+     * Show the check-in form.
+     */
     public function showCheckIn(): Response
     {
+        $search = request('search');
+
         return Inertia::render('attendances/CheckIn', [
-            'memberMemberships' => $this->memberMembershipService->getPaginated(),
+            'memberMemberships' => $this->memberMembershipService->getPaginated(15, [
+                'status' => 'active',
+                'search' => $search,
+            ]),
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
@@ -82,35 +100,5 @@ class AttendanceController extends Controller
                 ->back()
                 ->withErrors(['member_membership_id' => $e->getMessage()]);
         }
-    }
-
-    /**
-     * Process check-out.
-     */
-    public function checkOut(CheckOutRequest $request, Attendance $attendance): RedirectResponse
-    {
-        try {
-            $this->service->checkOut($attendance, $request->validated()['notes'] ?? null);
-
-            return redirect()
-                ->route('attendances.today')
-                ->with('success', 'Check-out successful.');
-        } catch (NotCheckedInException $e) {
-            return redirect()
-                ->back()
-                ->withErrors(['attendance' => $e->getMessage()]);
-        }
-    }
-
-    /**
-     * Remove the specified attendance.
-     */
-    public function destroy(Attendance $attendance): RedirectResponse
-    {
-        $this->service->delete($attendance);
-
-        return redirect()
-            ->route('attendances.index')
-            ->with('success', 'Attendance deleted successfully.');
     }
 }

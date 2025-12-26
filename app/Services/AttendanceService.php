@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Exceptions\MembershipExpiredException;
 use App\Exceptions\QuotaExhaustedException;
-use App\Exceptions\AlreadyCheckedInException;
-use App\Exceptions\NotCheckedInException;
 use App\Models\Attendance;
 use App\Models\MemberMembership;
 use App\Repositories\AttendanceRepository;
@@ -29,9 +27,12 @@ class AttendanceService
     /**
      * Get paginated attendances.
      */
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    /**
+     * Get paginated attendances.
+     */
+    public function getPaginated(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
-        return $this->repository->paginate($perPage);
+        return $this->repository->paginate($perPage, $filters);
     }
 
     /**
@@ -94,11 +95,11 @@ class AttendanceService
             throw new QuotaExhaustedException('Attendance quota has been exhausted.');
         }
 
-        // Check if already checked-in
-        $existingCheckIn = $this->repository->findCurrentlyCheckedIn($memberMembership);
-        if ($existingCheckIn) {
-            throw new AlreadyCheckedInException('Member is already checked-in.');
-        }
+        // Check if already checked-in - REMOVED for visit logging simplification
+        // $existingCheckIn = $this->repository->findCurrentlyCheckedIn($memberMembership);
+        // if ($existingCheckIn) {
+        //     throw new AlreadyCheckedInException('Member is already checked-in.');
+        // }
 
         // Create attendance with snapshot
         return $this->repository->create([
@@ -109,35 +110,5 @@ class AttendanceService
             'check_in_at' => now(),
             'notes' => $notes,
         ]);
-    }
-
-    /**
-     * Check-out member.
-     *
-     * @throws NotCheckedInException
-     */
-    public function checkOut(Attendance $attendance, ?string $notes = null): Attendance
-    {
-        if ($attendance->check_out_at !== null) {
-            throw new NotCheckedInException('Member has already checked-out.');
-        }
-
-        $updateData = ['check_out_at' => now()];
-
-        if ($notes !== null) {
-            $updateData['notes'] = $attendance->notes
-                ? $attendance->notes . "\n" . $notes
-                : $notes;
-        }
-
-        return $this->repository->update($attendance, $updateData);
-    }
-
-    /**
-     * Delete attendance.
-     */
-    public function delete(Attendance $attendance): bool
-    {
-        return $this->repository->delete($attendance);
     }
 }

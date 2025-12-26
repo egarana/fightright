@@ -179,14 +179,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('today', 'today')->name('today');
-            Route::get('check-in', 'showCheckIn')->name('check-in.show');
+            Route::get('create', 'showCheckIn')->name('create');
+            Route::post('/', 'checkIn')->name('store');
             Route::post('check-in', 'checkIn')->name('check-in');
-            Route::post('{attendance}/check-out', 'checkOut')->name('check-out');
-
-            // Delete - super-admin, owner, manager only
-            Route::delete('{attendance}', 'destroy')
-                ->middleware('can_or_404:delete_attendances')
-                ->name('destroy');
         });
 });
 

@@ -28,9 +28,12 @@ class MemberMembershipService
     /**
      * Get paginated member memberships.
      */
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    /**
+     * Get paginated member memberships.
+     */
+    public function getPaginated(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
-        return $this->repository->paginate($perPage);
+        return $this->repository->paginate($perPage, $filters);
     }
 
     /**
