@@ -30,7 +30,8 @@ class MemberMembershipController extends Controller
 
         $query = MemberMembership::query()
             ->where('member_id', $member->id)
-            ->with('membership');
+            ->with('membership')
+            ->withCount('attendances');
 
         // Handle search
         if ($search) {
@@ -54,15 +55,24 @@ class MemberMembershipController extends Controller
                 'status',
                 'created_at',
                 'snapshot_max_attendance_qty',
-                'snapshot_price'
+                'snapshot_price',
+                'remaining_qty'
             ];
             if (in_array($field, $allowedSorts)) {
-                $query->orderBy($field, $direction);
+                if ($field === 'remaining_qty') {
+                    // Sort by (max - used), treating NULL as highest (unlimited)
+                    $query->orderByRaw(
+                        "CASE WHEN snapshot_max_attendance_qty IS NULL THEN 1 ELSE 0 END {$direction}, " .
+                            "(COALESCE(snapshot_max_attendance_qty, 0) - attendances_count) {$direction}"
+                    );
+                } else {
+                    $query->orderBy($field, $direction);
+                }
             } else {
-                $query->orderByDesc('created_at');
+                $query->orderByDesc('started_at');
             }
         } else {
-            $query->orderByDesc('created_at');
+            $query->orderByDesc('started_at');
         }
 
         $memberMemberships = $query->paginate($perPage);

@@ -1,0 +1,69 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Member;
+use App\Models\MemberMembership;
+use App\Services\AttendanceService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class PublicMemberController extends Controller
+{
+    public function __construct(
+        protected AttendanceService $attendanceService
+    ) {}
+
+    /**
+     * Show the public member profile.
+     */
+    public function show(Member $member): Response
+    {
+        // Get all memberships (including expired) with attendances for slot tracking
+        $memberships = $member->memberMemberships()
+            ->with(['membership', 'attendances' => fn($q) => $q->orderBy('created_at', 'asc')])
+            ->get()
+            ->map(function (MemberMembership $mm) {
+                return array_merge($mm->toArray(), [
+                    'remaining_qty' => $mm->remaining_qty,
+                    'is_expired' => $mm->isExpired(),
+                    'can_check_in' => $mm->canCheckIn(),
+                    'used_count' => $mm->attendances->count(),
+                ]);
+            });
+
+        return Inertia::render('public/member/Show', [
+            'member' => $member,
+            'memberships' => $memberships,
+            'isAdmin' => auth()->check(),
+        ]);
+    }
+
+    /**
+     * Log a visit for a member's membership (admin only).
+     */
+    public function checkIn(Request $request, Member $member): RedirectResponse
+    {
+        $validated = $request->validate([
+            'member_membership_id' => 'required|integer',
+        ]);
+
+        // Find the membership and verify ownership
+        $membership = MemberMembership::where('id', $validated['member_membership_id'])
+            ->where('member_id', $member->id)
+            ->where('status', 'active')
+            ->firstOrFail();
+
+        // Validate can check-in
+        if (!$membership->canCheckIn()) {
+            return back()->with('error', 'Cannot check-in. Membership expired or quota exhausted.');
+        }
+
+        // Log the attendance
+        $this->attendanceService->checkIn($membership);
+
+        return back()->with('success', 'Visit logged successfully.');
+    }
+}

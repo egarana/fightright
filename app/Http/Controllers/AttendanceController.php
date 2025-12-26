@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Exceptions\AlreadyCheckedInException;
 use App\Exceptions\MembershipExpiredException;
 use App\Exceptions\NotCheckedInException;
-use App\Exceptions\QuotaExhaustedException;
 use App\Http\Requests\CheckInRequest;
 use App\Http\Requests\CheckOutRequest;
 use App\Models\Attendance;
@@ -88,10 +87,6 @@ class AttendanceController extends Controller
                 ->route('attendances.today')
                 ->with('success', 'Check-in successful.');
         } catch (MembershipExpiredException $e) {
-            return redirect()
-                ->back()
-                ->withErrors(['member_membership_id' => $e->getMessage()]);
-        } catch (QuotaExhaustedException $e) {
             return redirect()
                 ->back()
                 ->withErrors(['member_membership_id' => $e->getMessage()]);

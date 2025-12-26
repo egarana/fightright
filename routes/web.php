@@ -6,6 +6,7 @@ use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MemberMembershipController;
 use App\Http\Controllers\MembershipController;
+use App\Http\Controllers\PublicMemberController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -17,9 +18,12 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/m/{member:member_code}', [PublicMemberController::class, 'show'])
+    ->name('public.member.show');
+
+Route::post('/m/{member:member_code}/check-in', [PublicMemberController::class, 'checkIn'])
+    ->middleware(['auth'])
+    ->name('public.member.check-in');
 
 /*
 |--------------------------------------------------------------------------

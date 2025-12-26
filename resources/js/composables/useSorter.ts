@@ -4,13 +4,28 @@ import type { UseFetcherReturn } from './useFetcher';
 interface SorterOptions {
     defaultField?: string;
     defaultDirection?: 'asc' | 'desc';
+    defaultSort?: string; // e.g. '-started_at' for desc, 'started_at' for asc
     fetcher?: Pick<UseFetcherReturn, 'fetchData' | 'lastParams'>;
     backend?: boolean;
 }
 
 export function useSorter(options: SorterOptions = {}) {
-    const sortField = ref(options.defaultField || '');
-    const sortDirection = ref<'asc' | 'desc'>(options.defaultDirection || 'asc');
+    // Parse defaultSort if provided (e.g. '-started_at' -> field: 'started_at', direction: 'desc')
+    let initField = options.defaultField || '';
+    let initDirection: 'asc' | 'desc' = options.defaultDirection || 'asc';
+
+    if (options.defaultSort) {
+        if (options.defaultSort.startsWith('-')) {
+            initField = options.defaultSort.substring(1);
+            initDirection = 'desc';
+        } else {
+            initField = options.defaultSort;
+            initDirection = 'asc';
+        }
+    }
+
+    const sortField = ref(initField);
+    const sortDirection = ref<'asc' | 'desc'>(initDirection);
 
     const handleSort = (field: string) => {
         if (sortField.value === field) {

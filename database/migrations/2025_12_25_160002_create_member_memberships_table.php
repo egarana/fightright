@@ -25,7 +25,7 @@ return new class extends Migration
             // Status & dates
             $table->timestamp('started_at');
             $table->timestamp('expired_at');
-            $table->string('status')->default('active'); // active, expired, exhausted, cancelled
+            $table->string('status')->default('active'); // active, expired, cancelled
 
             $table->timestamps();
 

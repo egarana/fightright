@@ -23,6 +23,11 @@ class MemberMembership extends Model
         'status',
     ];
 
+    /**
+     * Accessors to append to model's array/JSON form.
+     */
+    protected $appends = ['remaining_qty', 'used_qty'];
+
     protected function casts(): array
     {
         return [
@@ -90,16 +95,6 @@ class MemberMembership extends Model
     }
 
     /**
-     * Check if quota is exhausted.
-     */
-    public function isQuotaExhausted(): bool
-    {
-        $remaining = $this->remaining_qty;
-
-        return $remaining !== null && $remaining <= 0;
-    }
-
-    /**
      * Check if member can check-in with this membership.
      */
     public function canCheckIn(): bool
@@ -112,7 +107,9 @@ class MemberMembership extends Model
             return false;
         }
 
-        if ($this->isQuotaExhausted()) {
+        // Check if quota available (null = unlimited)
+        $remaining = $this->remaining_qty;
+        if ($remaining !== null && $remaining <= 0) {
             return false;
         }
 

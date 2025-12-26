@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import members from '@/routes/members';
 import BaseIndexPage from '@/components/BaseIndexPage.vue';
-import { IdCard } from 'lucide-vue-next';
+import { IdCard, ExternalLink } from 'lucide-vue-next';
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -36,6 +36,12 @@ const config = computed(() => ({
         ? (item: any) => ({ url: members.destroy.url(item.id) }) 
         : undefined,
     customActions: [
+        {
+            icon: ExternalLink,
+            label: 'View',
+            tooltip: 'View profile',
+            url: (item: any) => `/m/${item.member_code}`,
+        },
         {
             icon: IdCard,
             tooltip: 'Memberships',

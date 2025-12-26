@@ -30,7 +30,7 @@ import {
 
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { PlusCircle, CalendarIcon, CalendarCheck } from 'lucide-vue-next';
+import { PlusCircle, CalendarIcon, CalendarCheck, Infinity } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
 import { DateFormatter, getLocalTimeZone, today, type DateValue } from '@internationalized/date';
 import dayjs from 'dayjs';
@@ -101,6 +101,7 @@ const { resource, fetchData, refresh, lastParams } = useFetcher({
 const { sortState, handleSort } = useSorter({
     fetcher: { fetchData, lastParams },
     backend: true,
+    defaultSort: '-started_at',
 });
 
 // Date formatter for display
@@ -150,6 +151,7 @@ const columns = [
     { key: 'started_at', label: 'Started', sortable: true },
     { key: 'expired_at', label: 'Expires', sortable: true },
     { key: 'snapshot_max_attendance_qty', label: 'Max Attendance', sortable: true },
+    { key: 'remaining_qty', label: 'Remaining', sortable: true },
     { key: 'snapshot_price', label: 'Price', sortable: true },
     { key: 'status', label: 'Status', sortable: true },
 ];
@@ -158,7 +160,6 @@ const getStatusVariant = (status: string) => {
     switch (status) {
         case 'active': return 'default';
         case 'expired': return 'secondary';
-        case 'exhausted': return 'outline';
         case 'cancelled': return 'destructive';
         default: return 'secondary';
     }
@@ -299,6 +300,10 @@ const formatDate = (date: string) => dayjs(date).format('DD MMM YYYY');
                         <CalendarCheck class="w-4 h-4 text-muted-foreground" />
                         <span>{{ value ?? 'Unlimited' }}</span>
                     </div>
+                </template>
+                <template #cell-remaining_qty="{ value }">
+                    <span v-if="value !== null">{{ value }}</span>
+                    <Infinity v-else class="w-4 h-4 text-muted-foreground" />
                 </template>
                 <template #cell-snapshot_price="{ value }">
                     {{ formatCurrency(value, 'IDR') }}

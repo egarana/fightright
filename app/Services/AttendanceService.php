@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Exceptions\MembershipExpiredException;
-use App\Exceptions\QuotaExhaustedException;
 use App\Models\Attendance;
 use App\Models\MemberMembership;
 use App\Repositories\AttendanceRepository;
@@ -88,11 +87,10 @@ class AttendanceService
             throw new MembershipExpiredException('Membership has expired.');
         }
 
-        // Validate quota
-        if ($memberMembership->isQuotaExhausted()) {
-            // Update status to exhausted
-            $memberMembership->update(['status' => 'exhausted']);
-            throw new QuotaExhaustedException('Attendance quota has been exhausted.');
+        // Validate quota available (null = unlimited)
+        $remaining = $memberMembership->remaining_qty;
+        if ($remaining !== null && $remaining <= 0) {
+            throw new MembershipExpiredException('Attendance quota has been used up.');
         }
 
         // Check if already checked-in - REMOVED for visit logging simplification

@@ -209,8 +209,8 @@ class DummySeeder extends Seeder
         // Almost expired (untuk testing warning)
         $this->assignMembership($members[5], $memberships['Bronze - Pemula'], now()->subDays(28), false, true);
 
-        // Exhausted quota membership
-        $exhaustedMembership = $this->createExhaustedMembership($members[6], $memberships['Bronze - Pemula']);
+        // Fully used membership (semua kuota terpakai tapi masih aktif)
+        $fullyUsedMembership = $this->createFullyUsedMembership($members[6], $memberships['Bronze - Pemula']);
     }
 
     /**
@@ -353,9 +353,9 @@ class DummySeeder extends Seeder
     }
 
     /**
-     * Create a membership with exhausted quota.
+     * Create a membership with all quota used (but still active).
      */
-    private function createExhaustedMembership(Member $member, Membership $membership): MemberMembership
+    private function createFullyUsedMembership(Member $member, Membership $membership): MemberMembership
     {
         $startedAt = now()->subDays(25);
         $expiredAt = $startedAt->copy()->addDays($membership->duration_days);
@@ -370,7 +370,7 @@ class DummySeeder extends Seeder
             'snapshot_price' => $membership->price,
             'started_at' => $startedAt,
             'expired_at' => $expiredAt,
-            'status' => 'exhausted',
+            'status' => 'active',
         ]);
 
         // Create exactly max_qty attendances

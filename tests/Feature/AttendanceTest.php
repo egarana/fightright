@@ -2,7 +2,6 @@
 
 use App\Exceptions\AlreadyCheckedInException;
 use App\Exceptions\MembershipExpiredException;
-use App\Exceptions\QuotaExhaustedException;
 use App\Models\Attendance;
 use App\Models\Member;
 use App\Models\MemberMembership;
@@ -185,5 +184,5 @@ test('unlimited membership returns null for remaining qty', function () {
         ->create();
 
     expect($memberMembership->remaining_qty)->toBeNull();
-    expect($memberMembership->isQuotaExhausted())->toBeFalse();
+    expect($memberMembership->canCheckIn())->toBeTrue();
 });
