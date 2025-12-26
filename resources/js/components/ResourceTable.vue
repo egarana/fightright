@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog.vue';
 import EditAssignmentDialog from '@/components/EditAssignmentDialog.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
@@ -47,6 +47,8 @@ const props = defineProps<{
         url: (item: any) => string;
         variant?: 'ghost' | 'outline' | 'default' | 'secondary' | 'destructive';
         condition?: (item: any) => boolean; // Optional condition to show/hide button
+        method?: 'get' | 'post'; // HTTP method, defaults to 'get'
+        handler?: (item: any) => void; // Optional custom handler
     }>;
     editAssignmentConfig?: {
         getEditUrl: (item: any) => string;
@@ -135,6 +137,26 @@ const handleDelete = () => {
         props.refresh({}, true);
     }
 };
+
+// Helper to get visible actions for an item
+const getVisibleActions = (item: any) => {
+    if (!props.customActions) return [];
+    return props.customActions.filter(action => !action.condition || action.condition(item));
+};
+
+// Handle custom action - support for GET (link) and POST (router)
+const handleCustomAction = (action: any, item: any) => {
+    if (action.handler) {
+        // Use custom handler if provided
+        action.handler(item);
+    } else if (action.method === 'post') {
+        // Use router.post for POST requests
+        router.post(action.url(item));
+    } else {
+        // Default: navigate to URL
+        router.visit(action.url(item));
+    }
+};
 </script>
 
 <template>
@@ -180,7 +202,7 @@ const handleDelete = () => {
                                 <TableCell :colspan="columns.length" class="ps-5">
                                     <slot name="item" :item="item"></slot>
                                 </TableCell>
-                                <TableCell class="text-right flex items-center">
+                                <TableCell class="text-right flex items-center justify-end">
                                     <!-- Edit Assignment Dialog -->
                                     <template v-if="editAssignmentConfig">
                                         <EditAssignmentDialog
@@ -214,7 +236,7 @@ const handleDelete = () => {
                                         />
                                     </template>
 
-                                    <DropdownMenu v-if="editRoute || customActions">
+                                    <DropdownMenu v-if="editRoute || (customActions && customActions.length > 0)">
                                         <DropdownMenuTrigger as-child>
                                             <Button variant="ghost" size="icon" class="ms-auto">
                                                 <EllipsisVertical class="w-4 h-4 text-muted-foreground" />
@@ -228,18 +250,19 @@ const handleDelete = () => {
                                                 </Link>
                                             </DropdownMenuItem>
                                             <!-- Custom Actions -->
-                                            <template v-if="customActions">
-                                                <DropdownMenuSeparator />
-                                                <template v-for="(action, index) in customActions" :key="index">
-                                                    <DropdownMenuItem v-if="!action.condition || action.condition(item)" as-child>
-                                                        <Link :href="action.url(item)">
-                                                            {{ action.tooltip }}
-                                                        </Link>
+                                            <template v-if="customActions && customActions.length > 0">
+                                                <DropdownMenuSeparator v-if="getVisibleActions(item).length > 0" />
+                                                <template v-for="(action, index) in getVisibleActions(item)" :key="index">
+                                                    <DropdownMenuItem 
+                                                        @click="handleCustomAction(action, item)"
+                                                    >
+                                                        {{ action.tooltip }}
                                                     </DropdownMenuItem>
                                                 </template>
                                             </template>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
+                                    <div v-else class="h-9 w-0"></div>
                                 </TableCell>
                             </template>
 
@@ -268,7 +291,7 @@ const handleDelete = () => {
                                     </slot>
                                 </TableCell>
 
-                                <TableCell class="text-right flex items-center gap-0">
+                                <TableCell class="text-right flex items-center justify-end gap-0">
                                     <!-- Edit Assignment Dialog -->
                                     <template v-if="editAssignmentConfig">
                                         <EditAssignmentDialog
@@ -302,7 +325,7 @@ const handleDelete = () => {
                                         />
                                     </template>
 
-                                    <DropdownMenu v-if="editRoute || customActions">
+                                    <DropdownMenu v-if="editRoute || (customActions && customActions.length > 0)">
                                         <DropdownMenuTrigger as-child>
                                             <Button variant="ghost" size="icon" class="ms-auto">
                                                 <EllipsisVertical class="w-4 h-4 text-muted-foreground" />
@@ -316,18 +339,19 @@ const handleDelete = () => {
                                                 </Link>
                                             </DropdownMenuItem>
                                             <!-- Custom Actions -->
-                                            <template v-if="customActions">
-                                                <DropdownMenuSeparator />
-                                                <template v-for="(action, index) in customActions" :key="index">
-                                                    <DropdownMenuItem v-if="!action.condition || action.condition(item)" as-child>
-                                                        <Link :href="action.url(item)">
-                                                            {{ action.tooltip }}
-                                                        </Link>
+                                            <template v-if="customActions && customActions.length > 0">
+                                                <DropdownMenuSeparator v-if="getVisibleActions(item).length > 0" />
+                                                <template v-for="(action, index) in getVisibleActions(item)" :key="index">
+                                                    <DropdownMenuItem 
+                                                        @click="handleCustomAction(action, item)"
+                                                    >
+                                                        {{ action.tooltip }}
                                                     </DropdownMenuItem>
                                                 </template>
                                             </template>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
+                                    <div v-else class="h-9 w-0"></div>
                                 </TableCell>
                             </template>
                         </TableRow>

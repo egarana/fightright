@@ -1,3 +1,4 @@
+```vue
 <script setup lang="ts">
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
@@ -14,6 +15,7 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
+    
     <Toaster 
         position="top-right"
         :expand="true"

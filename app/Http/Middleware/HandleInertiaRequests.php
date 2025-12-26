@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -40,6 +42,11 @@ class HandleInertiaRequests extends Middleware
 
         $user = $request->user();
 
+        // Check if currently impersonating
+        $impersonatorId = Session::get('impersonator_id');
+        $isImpersonating = $impersonatorId !== null;
+        $impersonator = $isImpersonating ? User::find($impersonatorId) : null;
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -50,6 +57,9 @@ class HandleInertiaRequests extends Middleware
                 'can' => [
                     // Users - super-admin only
                     'manage_users' => $user?->hasRole('super-admin') ?? false,
+
+                    // Impersonation - only real super-admin (not impersonating)
+                    'impersonate' => ($user?->hasRole('super-admin') ?? false) && !$isImpersonating,
 
                     // Memberships - super-admin & owner can manage (create/edit/delete)
                     'manage_memberships' => $user?->hasAnyRole(['super-admin', 'owner']) ?? false,
@@ -68,6 +78,13 @@ class HandleInertiaRequests extends Middleware
                     // Revenue/financial data - super-admin & owner only
                     'view_revenue' => $user?->hasAnyRole(['super-admin', 'owner']) ?? false,
                 ],
+            ],
+            'impersonation' => [
+                'active' => $isImpersonating,
+                'impersonator' => $impersonator ? [
+                    'id' => $impersonator->id,
+                    'name' => $impersonator->name,
+                ] : null,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

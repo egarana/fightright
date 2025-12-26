@@ -30,7 +30,7 @@ import {
 
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { PlusCircle, CalendarIcon } from 'lucide-vue-next';
+import { PlusCircle, CalendarIcon, CalendarCheck } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
 import { DateFormatter, getLocalTimeZone, today, type DateValue } from '@internationalized/date';
 import dayjs from 'dayjs';
@@ -149,8 +149,8 @@ const columns = [
     { key: 'snapshot_membership_name', label: 'Membership', sortable: true, className: 'font-medium' },
     { key: 'started_at', label: 'Started', sortable: true },
     { key: 'expired_at', label: 'Expires', sortable: true },
-    { key: 'snapshot_max_attendance_qty', label: 'Max Attendance', sortable: false },
-    { key: 'snapshot_price', label: 'Price', sortable: false },
+    { key: 'snapshot_max_attendance_qty', label: 'Max Attendance', sortable: true },
+    { key: 'snapshot_price', label: 'Price', sortable: true },
     { key: 'status', label: 'Status', sortable: true },
 ];
 
@@ -181,17 +181,17 @@ const formatDate = (date: string) => dayjs(date).format('DD MMM YYYY');
                     :refresh="refresh"
                 />
 
-                <!-- Add Membership Dialog - only if user can manage -->
+                <!-- Add membership Dialog - only if user can manage -->
                 <Dialog v-if="can.manage_member_memberships" v-model:open="dialogOpen">
                     <DialogTrigger as-child>
                         <Button>
                             <PlusCircle class="w-4 h-4" />
-                            Add Membership
+                            Add membership
                         </Button>
                     </DialogTrigger>
                     <DialogContent class="sm:max-w-[425px]">
                         <DialogHeader>
-                            <DialogTitle>Add Membership</DialogTitle>
+                            <DialogTitle>Add membership</DialogTitle>
                             <DialogDescription>
                                 Assign a membership to {{ member.name }}.
                             </DialogDescription>
@@ -268,7 +268,7 @@ const formatDate = (date: string) => dayjs(date).format('DD MMM YYYY');
 
                             <DialogFooter>
                                 <Button type="submit" :disabled="form.processing || !form.membership_id">
-                                    {{ form.processing ? 'Saving...' : 'Add Membership' }}
+                                    {{ form.processing ? 'Saving...' : 'Add membership' }}
                                 </Button>
                             </DialogFooter>
                         </form>
@@ -295,7 +295,10 @@ const formatDate = (date: string) => dayjs(date).format('DD MMM YYYY');
                     {{ formatDate(value) }}
                 </template>
                 <template #cell-snapshot_max_attendance_qty="{ value }">
-                    {{ value ?? 'Unlimited' }}
+                    <div class="flex items-center gap-2">
+                        <CalendarCheck class="w-4 h-4 text-muted-foreground" />
+                        <span>{{ value ?? 'Unlimited' }}</span>
+                    </div>
                 </template>
                 <template #cell-snapshot_price="{ value }">
                     {{ formatCurrency(value, 'IDR') }}

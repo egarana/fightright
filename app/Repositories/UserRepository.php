@@ -52,10 +52,21 @@ class UserRepository
                 $field = substr($sort, 1);
             }
 
-            // Only allow sorting on valid columns
-            $allowedSorts = ['name', 'email', 'created_at', 'updated_at'];
+            $allowedSorts = ['name', 'email', 'created_at', 'updated_at', 'roles'];
             if (in_array($field, $allowedSorts)) {
-                $query->orderBy($field, $direction);
+                if ($field === 'roles') {
+                    // Sort by the first role name using subquery
+                    $query->orderBy(
+                        \Spatie\Permission\Models\Role::select('name')
+                            ->join('model_has_roles', 'roles.id', '=', 'model_has_roles.role_id')
+                            ->whereColumn('model_has_roles.model_id', 'users.id')
+                            ->where('model_has_roles.model_type', User::class)
+                            ->limit(1),
+                        $direction
+                    );
+                } else {
+                    $query->orderBy($field, $direction);
+                }
             } else {
                 $query->orderBy('name', 'asc');
             }

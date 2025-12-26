@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MemberMembershipController;
 use App\Http\Controllers\MembershipController;
@@ -36,6 +37,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->controller(DashboardController::class)
         ->group(function () {
             Route::get('/', 'index')->name('index');
+        });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Impersonation (Super Admin Only)
+    |--------------------------------------------------------------------------
+    */
+    // Stop impersonating - available to anyone being impersonated (must be before wildcard route)
+    Route::post('impersonate/stop', [ImpersonationController::class, 'stop'])
+        ->name('impersonate.stop');
+
+    Route::prefix('impersonate')
+        ->name('impersonate.')
+        ->controller(ImpersonationController::class)
+        ->middleware('role_or_404:super-admin')
+        ->group(function () {
+            Route::post('{user}', 'start')->name('start');
         });
 
     /*

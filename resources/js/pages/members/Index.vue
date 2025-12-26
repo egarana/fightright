@@ -47,5 +47,12 @@ const config = computed(() => ({
 </script>
 
 <template>
-    <BaseIndexPage title="Members" :config="config" />
+    <BaseIndexPage title="Members" :config="config">
+        <template #cell-member_memberships_count="{ value }">
+             <div class="flex items-center gap-2">
+                <IdCard class="w-4 h-4 text-muted-foreground" />
+                <span>{{ value }}</span>
+            </div>
+        </template>
+    </BaseIndexPage>
 </template>

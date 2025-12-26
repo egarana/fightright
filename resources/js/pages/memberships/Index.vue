@@ -5,6 +5,7 @@ import { formatCurrency } from '@/helpers/currency';
 import { Badge } from '@/components/ui/badge';
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { Clock, CalendarCheck } from 'lucide-vue-next';
 
 const page = usePage();
 const can = computed(() => (page.props.auth as any)?.can ?? {});
@@ -41,6 +42,18 @@ const config = computed(() => ({
 
 <template>
     <BaseIndexPage title="Memberships" :config="config">
+        <template #cell-duration_days="{ value }">
+            <div class="flex items-center gap-2">
+                <Clock class="w-4 h-4 text-muted-foreground" />
+                <span>{{ value }} Days</span>
+            </div>
+        </template>
+        <template #cell-max_attendance_qty="{ value }">
+             <div class="flex items-center gap-2">
+                <CalendarCheck class="w-4 h-4 text-muted-foreground" />
+                <span>{{ value ?? 'Unlimited' }}</span>
+            </div>
+        </template>
         <template #cell-is_active="{ value }">
             <Badge :variant="value ? 'outline' : 'secondary'" class="text-xs rounded-md">
                 {{ value ? 'Active' : 'Inactive' }}

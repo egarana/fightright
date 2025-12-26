@@ -24,6 +24,8 @@ import attendances from '@/routes/attendances';
 
 const page = usePage();
 
+import ImpersonationBanner from '@/components/ImpersonationBanner.vue';
+
 // Auth permissions from backend
 const can = computed(() => (page.props.auth as any)?.can ?? {});
 
@@ -101,6 +103,7 @@ const footerNavItems: NavItem[] = [
 
         <SidebarFooter>
             <!-- <NavFooter :items="footerNavItems" /> -->
+            <ImpersonationBanner />
             <NavUser />
         </SidebarFooter>
     </Sidebar>

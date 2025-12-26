@@ -47,7 +47,15 @@ class MemberMembershipController extends Controller
                 $field = substr($sort, 1);
             }
 
-            $allowedSorts = ['snapshot_membership_name', 'started_at', 'expired_at', 'status', 'created_at'];
+            $allowedSorts = [
+                'snapshot_membership_name',
+                'started_at',
+                'expired_at',
+                'status',
+                'created_at',
+                'snapshot_max_attendance_qty',
+                'snapshot_price'
+            ];
             if (in_array($field, $allowedSorts)) {
                 $query->orderBy($field, $direction);
             } else {
