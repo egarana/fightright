@@ -22,7 +22,7 @@ class StoreMemberMembershipRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'member_id' => ['required', 'exists:members,id'],
+            'member_id' => ['nullable', 'exists:members,id'],
             'membership_id' => ['required', 'exists:memberships,id'],
             'started_at' => ['nullable', 'date'],
         ];

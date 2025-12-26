@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
@@ -20,10 +21,15 @@ class UserController extends Controller
     /**
      * Display a listing of users.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         return Inertia::render('users/Index', [
-            'users' => $this->service->getPaginated(),
+            'users' => $this->service->getPaginated(
+                perPage: $request->input('per_page', 15),
+                sort: $request->input('sort'),
+                search: $request->input('search'),
+                fields: $request->input('fields'),
+            ),
         ]);
     }
 
@@ -45,7 +51,7 @@ class UserController extends Controller
         $this->service->create($request->validated());
 
         return redirect()
-            ->route('users.index')
+            ->route('users.index', ['sort' => '-created_at'])
             ->with('success', 'User created successfully.');
     }
 
@@ -70,7 +76,7 @@ class UserController extends Controller
         $this->service->update($user, $request->validated());
 
         return redirect()
-            ->route('users.index')
+            ->route('users.index', ['sort' => '-updated_at'])
             ->with('success', 'User updated successfully.');
     }
 

@@ -11,11 +11,11 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { BookOpen, CalendarCheck, ContactRound, Folder, IdCard, LayoutGrid, Users } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
+import dashboard from '@/routes/dashboard';
 import users from '@/routes/users';
 import members from '@/routes/members';
 import memberships from '@/routes/memberships';
@@ -24,27 +24,27 @@ import attendances from '@/routes/attendances';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: dashboard.index.url(),
         icon: LayoutGrid,
     },
     {
         title: 'Users',
-        href: users.index(),
+        href: users.index.url(),
         icon: Users,
     },
     {
         title: 'Members',
-        href: members.index(),
+        href: members.index.url(),
         icon: ContactRound,
     },
     {
         title: 'Memberships',
-        href: memberships.index(),
+        href: memberships.index.url(),
         icon: IdCard,
     },
     {
         title: 'Attendances',
-        href: attendances.index(),
+        href: attendances.index.url(),
         icon: CalendarCheck,
     },
 ];
@@ -69,7 +69,7 @@ const footerNavItems: NavItem[] = [
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link :href="dashboard.index.url()">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>

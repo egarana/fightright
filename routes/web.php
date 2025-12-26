@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MemberMembershipController;
 use App\Http\Controllers\MembershipController;
@@ -25,6 +26,18 @@ Route::get('dashboard', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified'])->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | Dashboard
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('dashboard')
+        ->name('dashboard.')
+        ->controller(DashboardController::class)
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+        });
+
     /*
     |--------------------------------------------------------------------------
     | Users
@@ -58,6 +71,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('{member}/edit', 'edit')->name('edit');
             Route::put('{member}', 'update')->name('update');
             Route::delete('{member}', 'destroy')->name('destroy');
+
+            // Member Memberships (nested resource)
+            Route::prefix('{member}/memberships')
+                ->name('memberships.')
+                ->controller(MemberMembershipController::class)
+                ->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('create', 'create')->name('create');
+                    Route::post('/', 'store')->name('store');
+                    Route::delete('{memberMembership}', 'destroy')->name('destroy');
+                });
         });
 
     /*

@@ -23,12 +23,47 @@ class UserRepository
     /**
      * Get paginated users.
      */
-    public function paginate(int $perPage = 15): LengthAwarePaginator
+    public function paginate(int $perPage = 15, ?string $sort = null, ?string $search = null, ?string $fields = null): LengthAwarePaginator
     {
-        return $this->model
-            ->with('roles')
-            ->orderBy('name')
-            ->paginate($perPage);
+        $query = $this->model->with('roles');
+
+        // Handle search with dynamic fields
+        if ($search) {
+            $searchFields = $fields ? explode(',', $fields) : ['name', 'email'];
+            $allowedFields = ['name', 'email'];
+            $validFields = array_intersect($searchFields, $allowedFields);
+
+            if (!empty($validFields)) {
+                $query->where(function ($q) use ($search, $validFields) {
+                    foreach ($validFields as $field) {
+                        $q->orWhere($field, 'like', "%{$search}%");
+                    }
+                });
+            }
+        }
+
+        // Handle sort
+        if ($sort) {
+            $direction = 'asc';
+            $field = $sort;
+
+            if (str_starts_with($sort, '-')) {
+                $direction = 'desc';
+                $field = substr($sort, 1);
+            }
+
+            // Only allow sorting on valid columns
+            $allowedSorts = ['name', 'email', 'created_at', 'updated_at'];
+            if (in_array($field, $allowedSorts)) {
+                $query->orderBy($field, $direction);
+            } else {
+                $query->orderBy('name', 'asc');
+            }
+        } else {
+            $query->orderBy('name', 'asc');
+        }
+
+        return $query->paginate($perPage);
     }
 
     /**

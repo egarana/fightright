@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import members from '@/routes/members';
 import BaseIndexPage from '@/components/BaseIndexPage.vue';
+import { IdCard } from 'lucide-vue-next';
 
 const config = {
     resourceName: 'Member',
@@ -11,6 +12,7 @@ const config = {
         { key: 'member_code', label: 'Code', sortable: true, className: 'font-mono' },
         { key: 'name', label: 'Name', sortable: true, className: 'font-medium' },
         { key: 'email', label: 'Email', sortable: true },
+        { key: 'member_memberships_count', label: 'Memberships', sortable: true },
         { key: 'created_at', label: 'Created At', sortable: true },
         { key: 'updated_at', label: 'Updated At', sortable: true },
     ],
@@ -22,6 +24,14 @@ const config = {
     addButtonRoute: members.create.url(),
     editRoute: (item: any) => members.edit.url(item.id),
     deleteRoute: (item: any) => ({ url: members.destroy.url(item.id) }),
+    customActions: [
+        {
+            icon: IdCard,
+            tooltip: 'Memberships',
+            url: (item: any) => members.memberships.index.url(item.id),
+            variant: 'outline' as const,
+        },
+    ],
 };
 </script>
 

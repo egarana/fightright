@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateMembershipRequest;
 use App\Models\Membership;
 use App\Services\MembershipService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,10 +20,15 @@ class MembershipController extends Controller
     /**
      * Display a listing of memberships.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         return Inertia::render('memberships/Index', [
-            'memberships' => $this->service->getPaginated(),
+            'memberships' => $this->service->getPaginated(
+                perPage: $request->input('per_page', 15),
+                sort: $request->input('sort'),
+                search: $request->input('search'),
+                fields: $request->input('fields'),
+            ),
         ]);
     }
 
@@ -42,7 +48,7 @@ class MembershipController extends Controller
         $this->service->create($request->validated());
 
         return redirect()
-            ->route('memberships.index')
+            ->route('memberships.index', ['sort' => '-created_at'])
             ->with('success', 'Membership created successfully.');
     }
 
@@ -64,7 +70,7 @@ class MembershipController extends Controller
         $this->service->update($membership, $request->validated());
 
         return redirect()
-            ->route('memberships.index')
+            ->route('memberships.index', ['sort' => '-updated_at'])
             ->with('success', 'Membership updated successfully.');
     }
 

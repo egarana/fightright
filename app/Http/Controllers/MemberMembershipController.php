@@ -6,9 +6,9 @@ use App\Http\Requests\StoreMemberMembershipRequest;
 use App\Models\Member;
 use App\Models\MemberMembership;
 use App\Services\MemberMembershipService;
-use App\Services\MemberService;
 use App\Services\MembershipService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -16,39 +16,75 @@ class MemberMembershipController extends Controller
 {
     public function __construct(
         protected MemberMembershipService $service,
-        protected MemberService $memberService,
         protected MembershipService $membershipService
     ) {}
 
     /**
-     * Display a listing of member memberships.
+     * Display a listing of member's memberships.
      */
-    public function index(): Response
+    public function index(Request $request, Member $member): Response
     {
-        return Inertia::render('member-memberships/Index', [
-            'memberMemberships' => $this->service->getPaginated(),
-        ]);
-    }
+        $perPage = $request->input('per_page', 15);
+        $sort = $request->input('sort');
+        $search = $request->input('search');
 
-    /**
-     * Show the form for creating a new member membership.
-     */
-    public function create(): Response
-    {
-        return Inertia::render('member-memberships/Create', [
-            'members' => $this->memberService->getAll(),
+        $query = MemberMembership::query()
+            ->where('member_id', $member->id)
+            ->with('membership');
+
+        // Handle search
+        if ($search) {
+            $query->where('snapshot_membership_name', 'like', "%{$search}%");
+        }
+
+        // Handle sort
+        if ($sort) {
+            $direction = 'asc';
+            $field = $sort;
+
+            if (str_starts_with($sort, '-')) {
+                $direction = 'desc';
+                $field = substr($sort, 1);
+            }
+
+            $allowedSorts = ['snapshot_membership_name', 'started_at', 'expired_at', 'status', 'created_at'];
+            if (in_array($field, $allowedSorts)) {
+                $query->orderBy($field, $direction);
+            } else {
+                $query->orderByDesc('created_at');
+            }
+        } else {
+            $query->orderByDesc('created_at');
+        }
+
+        $memberMemberships = $query->paginate($perPage);
+
+        return Inertia::render('members/memberships/Index', [
+            'member' => $member,
+            'memberMemberships' => $memberMemberships,
             'memberships' => $this->membershipService->getAllActive(),
         ]);
     }
 
     /**
-     * Store a newly created member membership.
+     * Show the form for creating a new membership assignment.
      */
-    public function store(StoreMemberMembershipRequest $request): RedirectResponse
+    public function create(Member $member): Response
+    {
+        $memberships = $this->membershipService->getAllActive();
+
+        return Inertia::render('members/memberships/Create', [
+            'member' => $member,
+            'memberships' => $memberships,
+        ]);
+    }
+
+    /**
+     * Store a newly created membership assignment.
+     */
+    public function store(StoreMemberMembershipRequest $request, Member $member): RedirectResponse
     {
         $validated = $request->validated();
-
-        $member = $this->memberService->getByIdOrFail($validated['member_id']);
         $membership = $this->membershipService->getByIdOrFail($validated['membership_id']);
 
         $this->service->assignMembership(
@@ -58,43 +94,19 @@ class MemberMembershipController extends Controller
         );
 
         return redirect()
-            ->route('member-memberships.index')
+            ->route('members.memberships.index', $member)
             ->with('success', 'Membership assigned successfully.');
     }
 
     /**
-     * Display the specified member membership.
+     * Remove the specified membership assignment.
      */
-    public function show(MemberMembership $memberMembership): Response
-    {
-        $memberMembership = $this->service->getByIdOrFail($memberMembership->id);
-
-        return Inertia::render('member-memberships/Show', [
-            'memberMembership' => $memberMembership,
-        ]);
-    }
-
-    /**
-     * Cancel the specified member membership.
-     */
-    public function cancel(MemberMembership $memberMembership): RedirectResponse
-    {
-        $this->service->cancel($memberMembership);
-
-        return redirect()
-            ->route('member-memberships.index')
-            ->with('success', 'Membership cancelled successfully.');
-    }
-
-    /**
-     * Remove the specified member membership.
-     */
-    public function destroy(MemberMembership $memberMembership): RedirectResponse
+    public function destroy(Member $member, MemberMembership $memberMembership): RedirectResponse
     {
         $this->service->delete($memberMembership);
 
         return redirect()
-            ->route('member-memberships.index')
-            ->with('success', 'Member membership deleted successfully.');
+            ->route('members.memberships.index', $member)
+            ->with('success', 'Membership removed successfully.');
     }
 }

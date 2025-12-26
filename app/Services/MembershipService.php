@@ -32,9 +32,9 @@ class MembershipService
     /**
      * Get paginated memberships.
      */
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(int $perPage = 15, ?string $sort = null, ?string $search = null, ?string $fields = null): LengthAwarePaginator
     {
-        return $this->repository->paginate($perPage);
+        return $this->repository->paginate($perPage, $sort, $search, $fields);
     }
 
     /**
