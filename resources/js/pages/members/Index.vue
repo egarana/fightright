@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import members from '@/routes/members';
 import BaseIndexPage from '@/components/BaseIndexPage.vue';
-import { IdCard, ExternalLink, CalendarX2 } from 'lucide-vue-next';
-import { usePage } from '@inertiajs/vue3';
+import { IdCard, ExternalLink, CalendarX2, Mail, Eye } from 'lucide-vue-next';
+import { usePage, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { toast } from 'vue-sonner';
 
 const page = usePage();
 const can = computed(() => (page.props.auth as any)?.can ?? {});
@@ -60,6 +61,34 @@ const config = computed(() => ({
             tooltip: 'Memberships',
             url: (item: any) => members.memberships.index.url(item.id),
             variant: 'outline' as const,
+        },
+        {
+            icon: Eye,
+            tooltip: 'Preview ID card',
+            url: (item: any) => members.idCard.preview.url(item.id),
+            target: '_blank',
+            variant: 'outline' as const,
+        },
+        {
+            icon: Mail,
+            tooltip: 'Send ID card',
+            url: (item: any) => members.sendIdCard.url(item.id),
+            variant: 'outline' as const,
+            handler: (item: any) => {
+                router.post(members.sendIdCard.url(item.id), {}, {
+                    onSuccess: () => {
+                        toast.success('ID Card sent successfully', {
+                            description: `The ID card for ${item.name} has been emailed.`
+                        });
+                    },
+                    onError: () => {
+                        toast.error('Failed to send ID Card', {
+                             description: 'An unexpected error occurred. Please try again.',
+                             class: 'toast-destructive',
+                        });
+                    },
+                });
+            },
         },
     ],
 }));

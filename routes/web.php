@@ -91,6 +91,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('create', 'create')->name('create');
             Route::post('/', 'store')->name('store');
             Route::get('{member}', 'show')->name('show');
+            Route::post('{member}/send-id-card', 'sendIdCard')->name('send-id-card');
+            Route::get('{member}/id-card/preview', 'previewIdCard')->name('id-card.preview');
 
             // Edit - super-admin, owner, manager only
             Route::get('{member}/edit', 'edit')

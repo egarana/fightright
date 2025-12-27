@@ -4,10 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMemberRequest;
 use App\Http\Requests\UpdateMemberRequest;
+use App\Mail\MemberIdCard;
 use App\Models\Member;
 use App\Services\MemberService;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -100,5 +107,48 @@ class MemberController extends Controller
         return redirect()
             ->route('members.index')
             ->with('success', 'Member deleted successfully.');
+    }
+
+    /**
+     * Preview ID Card.
+     */
+    public function previewIdCard(Member $member)
+    {
+        $pdf = $this->generateIdCardPdf($member);
+
+        return $pdf->stream('fightright-id-card-' . $member->member_code . '.pdf');
+    }
+
+    /**
+     * Send ID Card to the member via email.
+     */
+    public function sendIdCard(Member $member): RedirectResponse
+    {
+        $pdf = $this->generateIdCardPdf($member);
+
+        // Send Email
+        Mail::to($member->email)->send(new MemberIdCard($member, $pdf->output()));
+
+        return back()->with('success', 'ID card sent successfully.');
+    }
+
+    /**
+     * Generate ID Card PDF.
+     */
+    private function generateIdCardPdf(Member $member)
+    {
+        // Generate QR Code
+        $renderer = new ImageRenderer(
+            new RendererStyle(400),
+            new SvgImageBackEnd()
+        );
+        $writer = new Writer($renderer);
+        $qrCode = $writer->writeString(route('public.member.show', $member->encoded_url));
+
+        // Generate PDF
+        // ID-1 Standard: 85.60 x 53.98 mm
+        // In points (1/72 inch): ~242.64 x 153.01
+        return Pdf::loadView('pdf.id-card', compact('member', 'qrCode'))
+            ->setPaper([0, 0, 259.2, 460.8], 'portrait');
     }
 }
