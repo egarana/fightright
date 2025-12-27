@@ -22,13 +22,17 @@ class MemberController extends Controller
      */
     public function index(Request $request): Response
     {
+        $filters = $request->only(['membership_id']);
+
         return Inertia::render('members/Index', [
             'members' => $this->service->getPaginated(
                 perPage: $request->input('per_page', 15),
                 sort: $request->input('sort'),
                 search: $request->input('search'),
                 fields: $request->input('fields'),
+                filters: $filters,
             ),
+            'membershipTypes' => \App\Models\Membership::active()->orderBy('name')->get(['id', 'name']),
         ]);
     }
 

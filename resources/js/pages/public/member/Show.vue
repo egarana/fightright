@@ -60,15 +60,29 @@ const handleCheckIn = (membership: any) => {
     );
 };
 
+const isExpired = (membership: any) => {
+    return membership.is_expired || membership.status === 'expired';
+};
+
 // Get status badge variant
 const getStatusVariant = (membership: any) => {
-    if (membership.is_expired || membership.status === 'expired') return 'destructive';
+    if (isExpired(membership)) return 'destructive';
     if (membership.status === 'cancelled') return 'secondary';
     return 'default';
 };
 
+const getDisplaySlots = (membership: any) => {
+    // If limited, show 1 to max qty (ascending)
+    if (membership.snapshot_max_attendance_qty !== null) {
+        return Array.from({ length: membership.snapshot_max_attendance_qty }, (_, i) => i + 1);
+    }
+    // If unlimited, show from (used + 1) down to 1 (descending)
+    const total = (membership.used_count || 0) + 1;
+    return Array.from({ length: total }, (_, i) => total - i);
+}; 
+
 const getStatusLabel = (membership: any) => {
-    if (membership.is_expired || membership.status === 'expired') return 'Expired';
+    if (isExpired(membership)) return 'Expired';
     if (membership.status === 'cancelled') return 'Cancelled';
     return 'Active';
 };
@@ -114,13 +128,13 @@ const getStatusLabel = (membership: any) => {
                             </div>
                         </AccordionTrigger>
                         <AccordionContent>
-                            <!-- Only show session slots if qty is limited -->
-                            <div v-if="membership.snapshot_max_attendance_qty !== null" class="divide-y">
+                            <!-- Unified session slots view for both limited and unlimited -->
+                            <div class="divide-y">
                                 <div
-                                    v-for="slot in membership.snapshot_max_attendance_qty"
+                                    v-for="slot in getDisplaySlots(membership)"
                                     :key="slot"
                                     class="flex items-center justify-between px-4 py-3"
-                                    :class="{ 'bg-muted': isSlotUsed(membership, slot) }"
+                                    :class="{ 'bg-muted': isSlotUsed(membership, slot) || isExpired(membership) }"
                                 >
                                     <div class="flex flex-col gap-0.5">
                                         <div class="flex items-center gap-2">
@@ -128,15 +142,15 @@ const getStatusLabel = (membership: any) => {
                                             <span class="text-xs text-muted-foreground">-</span>
                                             <span 
                                                 class="text-xs"
-                                                :class="isSlotUsed(membership, slot) ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'"
+                                                :class="isSlotUsed(membership, slot) ? 'text-green-600 dark:text-green-400' : (isExpired(membership) ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground')"
                                             >
-                                                {{ isSlotUsed(membership, slot) ? 'Used' : 'Available' }}
+                                                {{ isSlotUsed(membership, slot) ? 'Used' : (isExpired(membership) ? 'Expired' : 'Available') }}
                                             </span>
                                         </div>
                                         <span v-if="isSlotUsed(membership, slot) && getAttendanceForSlot(membership, slot)" class="text-xs text-muted-foreground">
                                             {{ formatDateTime(getAttendanceForSlot(membership, slot).check_in_at) }}
                                             <template v-if="getAttendanceForSlot(membership, slot).snapshot_recorded_by_name">
-                                                · by {{ getAttendanceForSlot(membership, slot).snapshot_recorded_by_name }}
+                                                by {{ getAttendanceForSlot(membership, slot).snapshot_recorded_by_name }}
                                             </template>
                                         </span>
                                     </div>
@@ -145,15 +159,11 @@ const getStatusLabel = (membership: any) => {
                                         <Spinner v-if="loadingStates[membership.id] && slot === membership.used_count + 1" class="text-muted-foreground" />
                                         <Switch
                                             :model-value="isSlotUsed(membership, slot)"
-                                            :disabled="slot !== membership.used_count + 1 || loadingStates[membership.id]"
+                                            :disabled="slot !== membership.used_count + 1 || loadingStates[membership.id] || isExpired(membership)"
                                             @update:model-value="handleCheckIn(membership)"
                                         />
                                     </div>
                                 </div>
-                            </div>
-                            <!-- Unlimited membership - just show summary -->
-                            <div v-else class="px-4 py-3 text-sm text-muted-foreground">
-                                Unlimited sessions
                             </div>
                         </AccordionContent>
                     </AccordionItem>

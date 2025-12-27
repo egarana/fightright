@@ -23,10 +23,23 @@ class MemberRepository
     /**
      * Get paginated members.
      */
-    public function paginate(int $perPage = 15, ?string $sort = null, ?string $search = null, ?string $fields = null): LengthAwarePaginator
+    public function paginate(int $perPage = 15, ?string $sort = null, ?string $search = null, ?string $fields = null, array $filters = []): LengthAwarePaginator
     {
         $query = $this->model->newQuery()
-            ->withCount('memberMemberships');
+            ->withCount([
+                'memberMemberships as memberships_count',
+                'memberMemberships as expired_memberships' => function ($query) {
+                    $query->where('expired_at', '<', now());
+                }
+            ]);
+
+        // Handle filters
+        if (!empty($filters['membership_id'])) {
+            $ids = explode(',', $filters['membership_id']);
+            $query->whereHas('memberMemberships', function ($q) use ($ids) {
+                $q->whereIn('membership_id', $ids);
+            });
+        }
 
         // Handle search with dynamic fields
         if ($search) {
@@ -54,7 +67,7 @@ class MemberRepository
             }
 
             // Only allow sorting on valid columns
-            $allowedSorts = ['member_code', 'name', 'email', 'created_at', 'updated_at', 'member_memberships_count'];
+            $allowedSorts = ['member_code', 'name', 'email', 'created_at', 'updated_at', 'memberships_count', 'expired_memberships'];
             if (in_array($field, $allowedSorts)) {
                 $query->orderBy($field, $direction);
             } else {
