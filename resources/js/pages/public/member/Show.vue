@@ -65,12 +65,7 @@ const isExpired = (membership: any) => {
     return membership.is_expired || membership.status === 'expired';
 };
 
-// Get status badge variant
-const getStatusVariant = (membership: any) => {
-    if (isExpired(membership)) return 'destructive';
-    if (membership.status === 'cancelled') return 'secondary';
-    return 'default';
-};
+
 
 const getDisplaySlots = (membership: any) => {
     // If limited, show 1 to max qty (ascending)
@@ -93,7 +88,7 @@ const getStatusLabel = (membership: any) => {
     <Head :title="`${member.name} - Member Profile`" />
 
     <div class="min-h-svh bg-neutral-50 dark:bg-neutral-950">
-        <div class="w-full max-w-sm bg-background border-x min-h-svh mx-auto flex flex-col">
+        <div class="w-full bg-background border-x min-h-svh mx-auto flex flex-col lg:max-w-sm">
             <!-- Header -->
             <div class="py-10 border-b">
                 <AppLogoIcon class="w-36 h-36 mx-auto mb-6 dark:invert" />

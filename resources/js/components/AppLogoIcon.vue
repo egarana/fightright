@@ -20,6 +20,7 @@ defineProps<Props>();
         viewBox="0 0 10.583 10.583"
         :class="className"
         v-bind="$attrs"
+        class="dark:invert"
     >
         <defs>
             <clipPath id="a" clipPathUnits="userSpaceOnUse">
