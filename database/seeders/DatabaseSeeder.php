@@ -19,41 +19,11 @@ class DatabaseSeeder extends Seeder
         $user = User::factory()
             ->withoutTwoFactor()
             ->create([
-                'name' => 'Ega Rana Bimansa',
+                'name' => 'Ega Rana',
                 'email' => 'bimansaegarana@gmail.com',
                 'password' => Hash::make('Letdareca1#8'),
             ]);
 
         $user->assignRole('super-admin');
-
-        $owner = User::factory()
-            ->withoutTwoFactor()
-            ->create([
-                'name' => 'Gungde Gotama',
-                'email' => 'gungdegotama@frgym.com',
-                'password' => Hash::make('frgym1234'),
-            ]);
-
-        $owner->assignRole('owner');
-
-        $manager = User::factory()
-            ->withoutTwoFactor()
-            ->create([
-                'name' => 'Made Suartana',
-                'email' => 'madesuartana@frgym.com',
-                'password' => Hash::make('frgym1234'),
-            ]);
-
-        $manager->assignRole('manager');
-
-        $staff = User::factory()
-            ->withoutTwoFactor()
-            ->create([
-                'name' => 'Wayan Kadek',
-                'email' => 'wayankadek@frgym.com',
-                'password' => Hash::make('frgym1234'),
-            ]);
-
-        $staff->assignRole('staff');
     }
 }
