@@ -32,7 +32,7 @@ class MemberIdCard extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Fight Right Digital ID Card',
+            subject: 'Your ID Card is Ready',
         );
     }
 
@@ -57,7 +57,7 @@ class MemberIdCard extends Mailable
         return [
             Attachment::fromData(
                 fn() => $this->pdfContent,
-                'Member-ID-Card.pdf'
+                \Illuminate\Support\Str::snake($this->member->name) . '_' . $this->member->member_code . '.pdf'
             )
                 ->withMime('application/pdf'),
         ];

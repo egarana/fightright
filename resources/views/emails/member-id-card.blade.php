@@ -2,14 +2,14 @@
 <html>
 
 <head>
-    <title>Your Digital ID Card</title>
+    <title>Your ID Card</title>
 </head>
 
 <body>
-    <p>Dear {{ $member->name }},</p>
-    <p>Please find your Digital ID Card attached to this email.</p>
-    <p>You can save this image or print it out explicitly to check in at the gym.</p>
-    <p>Regards,<br>Fight Right Team</p>
+    <p>Hey {{ $member->name }}!</p>
+    <p>Your Fight Right ID card is attached, save it to your phone or print it out for easy check-ins at the gym.</p>
+    <p>See you on the mats!</p>
+    <p>Fight Right Team</p>
 </body>
 
 </html>

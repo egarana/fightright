@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import dashboard from '@/routes/dashboard';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/vue3';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Users, ContactRound, IdCard, CalendarCheck, DollarSign, UserCheck, Clock, AlertTriangle } from 'lucide-vue-next';
 import { formatCurrency } from '@/helpers/currency';
 import { computed } from 'vue';
@@ -51,106 +51,99 @@ const breadcrumbs: BreadcrumbItem[] = [
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
             <!-- Stats Grid -->
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <!-- Members Card -->
-                <Card>
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Total Members</CardTitle>
-                        <ContactRound class="h-4 w-4 text-muted-foreground" />
+                <Card class="gap-5 shadow-xs">
+                    <CardHeader class="flex items-center gap-3">
+                        <div class="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-md">
+                            <ContactRound class="h-4 w-4" />
+                        </div>
+                        <span class="text-2xl">{{ stats.members?.total ?? 0 }}</span>
                     </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.members?.total ?? 0 }}</div>
-                        <p class="text-xs text-muted-foreground">
-                            +{{ stats.members?.new_this_month ?? 0 }} this month
-                        </p>
+                    <CardContent class="flex flex-col gap-1.5">
+                        <div class="font-semibold text-sm">Members</div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-sm">
+                                {{ stats.members?.new_this_month ?? 0 }} <span class="text-muted-foreground">new this month</span>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
                 <!-- Active Memberships Card -->
-                <Card>
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Active Memberships</CardTitle>
-                        <IdCard class="h-4 w-4 text-muted-foreground" />
+                <Card class="gap-5 shadow-xs">
+                    <CardHeader class="flex items-center gap-3">
+                        <div class="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-md">
+                            <IdCard class="h-4 w-4" />
+                        </div>
+                        <span class="text-2xl">{{ stats.memberships?.active ?? 0 }}</span>
                     </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.memberships?.active ?? 0 }}</div>
-                        <p class="text-xs text-muted-foreground flex items-center gap-1">
-                            <AlertTriangle v-if="(stats.memberships?.expiring_soon ?? 0) > 0" class="h-3 w-3 text-orange-500" />
-                            {{ stats.memberships?.expiring_soon ?? 0 }} expiring soon
-                        </p>
+                    <CardContent class="flex flex-col gap-1.5">
+                        <div class="font-semibold text-sm">Active Memberships</div>
+                        <div class="flex items-center gap-2">
+                            <div>
+                                <AlertTriangle v-if="(stats.memberships?.expiring_soon ?? 0) > 0" class="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div class="text-sm">
+                                {{ stats.memberships?.expiring_soon ?? 0 }} <span class="text-muted-foreground">expiring soon</span>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
                 <!-- Today's Attendance Card -->
-                <Card>
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Today's Check-ins</CardTitle>
-                        <CalendarCheck class="h-4 w-4 text-muted-foreground" />
+                <Card class="gap-5 shadow-xs">
+                    <CardHeader class="flex items-center gap-3">
+                        <div class="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-md">
+                            <CalendarCheck class="h-4 w-4" />
+                        </div>
+                        <span class="text-2xl">{{ stats.attendances?.today ?? 0 }}</span>
                     </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.attendances?.today ?? 0 }}</div>
-                        <p class="text-xs text-muted-foreground flex items-center gap-1">
-                            <Clock class="h-3 w-3 text-green-500" />
-                            {{ stats.attendances?.currently_in ?? 0 }} currently in gym
-                        </p>
+                    <CardContent class="flex flex-col gap-1.5">
+                        <div class="font-semibold text-sm">Daily Attendance</div>
+                        <div class="flex items-center gap-2">
+                            <div>
+                                <Clock class="inline h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div class="text-sm">
+                                {{ stats.attendances?.currently_in ?? 0 }} <span class="text-muted-foreground">currently training</span>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
                 <!-- Revenue Card - Only for super-admin/owner -->
-                <Card v-if="can.view_revenue && stats.revenue">
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Revenue This Month</CardTitle>
-                        <DollarSign class="h-4 w-4 text-muted-foreground" />
+                <Card v-if="can.view_revenue && stats.revenue" class="gap-5 shadow-xs">
+                    <CardHeader class="flex items-center gap-3">
+                        <div class="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-md">
+                            <DollarSign class="h-4 w-4" />
+                        </div>
+                        <span class="text-2xl">{{ formatCurrency(stats.revenue.this_month, 'IDR') }}</span>
                     </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">{{ formatCurrency(stats.revenue.this_month, 'IDR') }}</div>
-                        <p class="text-xs text-muted-foreground">
-                            Total: {{ formatCurrency(stats.revenue.total, 'IDR') }}
-                        </p>
+                    <CardContent class="flex flex-col gap-1.5">
+                        <div class="font-semibold text-sm">Revenue This Month</div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-sm">
+                                Total: <span class="text-muted-foreground">{{ formatCurrency(stats.revenue.total, 'IDR') }}</span>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
                 <!-- Users Card - Only for super-admin -->
-                <Card v-if="can.manage_users && stats.users">
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">System Users</CardTitle>
-                        <Users class="h-4 w-4 text-muted-foreground" />
+                <Card v-if="can.manage_users && stats.users" class="gap-5 shadow-xs">
+                    <CardHeader class="flex items-center gap-3">
+                        <div class="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-md">
+                            <Users class="h-4 w-4" />
+                        </div>
+                        <span class="text-2xl">{{ stats.users.total }}</span>
                     </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">{{ stats.users.total }}</div>
-                        <p class="text-xs text-muted-foreground">
-                            Administrators & staff
-                        </p>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <!-- Quick Actions Section -->
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <Card class="col-span-full lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle>Welcome to FightRight</CardTitle>
-                        <CardDescription>
-                            Manage your gym members, memberships, and track attendance all in one place.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="flex flex-wrap gap-2">
-                            <a href="/attendances/check-in" 
-                               class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-                                <UserCheck class="h-4 w-4" />
-                                Check-in Member
-                            </a>
-                            <a href="/members" 
-                               class="inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent">
-                                <ContactRound class="h-4 w-4" />
-                                View Members
-                            </a>
-                            <a href="/attendances/today" 
-                               class="inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent">
-                                <CalendarCheck class="h-4 w-4" />
-                                Today's Attendance
-                            </a>
+                    <CardContent class="flex flex-col gap-1.5">
+                        <div class="font-semibold text-sm">System Users</div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-sm">
+                                <span class="text-muted-foreground">Administrators & staff</span>
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

@@ -143,7 +143,7 @@ class MemberController extends Controller
             new SvgImageBackEnd()
         );
         $writer = new Writer($renderer);
-        $qrCode = $writer->writeString(route('public.member.show', $member->encoded_url));
+        $qrCode = $writer->writeString('https://frgym.com/member/' . $member->encoded_url);
 
         // Generate PDF
         // ID-1 Standard: 85.60 x 53.98 mm

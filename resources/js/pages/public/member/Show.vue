@@ -191,7 +191,7 @@ const getStatusLabel = (membership: any) => {
 
             <!-- Footer -->
             <div class="text-center text-xs text-muted-foreground py-8 mt-auto">
-                &copy; {{ new Date().getFullYear() }} Fight Right
+                {{ new Date().getFullYear() }} Fight Right
             </div>
         </div>
     </div>
