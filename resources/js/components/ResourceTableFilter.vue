@@ -414,7 +414,7 @@ const hasActiveFilters = computed(() => {
 </script>
 
 <template>
-    <div class="space-y-2 md:space-y-0 md:flex md:items-center md:justify-start md:gap-2">
+    <div class="w-full space-y-2 md:space-y-0 md:w-auto md:flex md:items-center md:justify-start md:gap-2">
         <!-- Search Input -->
         <Input
             v-if="showSearch"
@@ -422,7 +422,7 @@ const hasActiveFilters = computed(() => {
             id="search"
             :placeholder="searchPlaceholder"
             :disabled="disabled"
-            class="text-sm md:max-w-[250px]"
+            class="text-sm min-w-[250px] md:max-w-[250px]"
         />
 
         <!-- Dropdown Filters -->

@@ -41,10 +41,10 @@ const { onSuccess, onError } = useFormNotifications({
 // Form fields - initialize with membership data
 const name = ref(props.membership.name);
 const description = ref(props.membership.description || '');
-const maxAttendanceQty = ref<number | null>(props.membership.max_attendance_qty);
-const durationDays = ref<number | null>(props.membership.duration_days);
-const price = ref<number | null>(props.membership.price);
-const isActive = ref(props.membership.is_active);
+const maxAttendanceQty = ref<number | ''>(props.membership.max_attendance_qty ?? '');
+const durationDays = ref<number>(props.membership.duration_days);
+const price = ref<number | ''>(props.membership.price ?? '');
+const isActive = ref(Boolean(props.membership.is_active));
 </script>
 
 <template>
@@ -119,7 +119,8 @@ const isActive = ref(props.membership.is_active);
                     <ItemDescription>When enabled, this membership will be visible and can be applied to members. Disable to temporarily hide without deleting.</ItemDescription>
                 </ItemContent>
                 <ItemActions>
-                    <Switch id="is_active" v-model:checked="isActive" />
+                    <Switch id="is_active" v-model="isActive" />
+                    <input type="hidden" name="is_active" :value="isActive ? 1 : 0" />
                 </ItemActions>
             </Item>
 
