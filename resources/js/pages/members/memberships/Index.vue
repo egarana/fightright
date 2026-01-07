@@ -182,8 +182,8 @@ const formatDate = (date: string) => dayjs(date).format('DD MMM YYYY');
                     :refresh="refresh"
                 />
 
-                <!-- Add membership Dialog - only if user can manage -->
-                <Dialog v-if="can.manage_member_memberships" v-model:open="dialogOpen">
+                <!-- Add membership Dialog - only if user can add -->
+                <Dialog v-if="can.add_member_membership" v-model:open="dialogOpen">
                     <DialogTrigger as-child>
                         <Button>
                             <PlusCircle class="w-4 h-4" />

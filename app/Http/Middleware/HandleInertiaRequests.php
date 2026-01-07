@@ -71,6 +71,8 @@ class HandleInertiaRequests extends Middleware
 
                     // Member Memberships - super-admin, owner, manager can delete/cancel
                     'manage_member_memberships' => $user?->hasAnyRole(['super-admin', 'owner', 'manager']) ?? false,
+                    // Member Memberships - super-admin, owner, manager, staff can add
+                    'add_member_membership' => $user?->hasAnyRole(['super-admin', 'owner', 'manager', 'staff']) ?? false,
 
                     // Attendances - super-admin, owner, manager can delete
                     'delete_attendances' => $user?->hasAnyRole(['super-admin', 'owner', 'manager']) ?? false,

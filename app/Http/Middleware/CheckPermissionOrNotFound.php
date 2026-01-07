@@ -32,6 +32,7 @@ class CheckPermissionOrNotFound
             'edit_members' => $user->hasAnyRole(['super-admin', 'owner', 'manager']),
             'delete_members' => $user->hasAnyRole(['super-admin', 'owner']),
             'manage_member_memberships' => $user->hasAnyRole(['super-admin', 'owner', 'manager']),
+            'add_member_membership' => $user->hasAnyRole(['super-admin', 'owner', 'manager', 'staff']),
             'delete_attendances' => $user->hasAnyRole(['super-admin', 'owner', 'manager']),
             'view_revenue' => $user->hasAnyRole(['super-admin', 'owner']),
             default => false,
